@@ -36,17 +36,29 @@ export default function PdfToJpg() {
     formData.append("file", pdfFile);
 
     try {
+      console.log("Sending file:", pdfFile.name);
+      console.log("File size:", pdfFile.size);
+      
       const response = await fetch(`${API_URL}/api/pdf-to-jpg`, {
         method: "POST",
         body: formData,
+        headers: {
+          // Don't set Content-Type header, let the browser set it with the boundary
+          'Accept': 'application/json, application/zip',
+        },
       });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
         const errorText = await response.text();
+        console.error("Server error:", errorText);
         throw new Error(errorText);
       }
 
       const blob = await response.blob();
+      console.log("Received blob:", blob.type, blob.size);
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -54,6 +66,7 @@ export default function PdfToJpg() {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
+      console.error("Conversion error:", err);
       alert("Error converting PDF: " + err.message);
     } finally {
       setIsConverting(false);
