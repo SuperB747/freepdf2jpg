@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onre
 export default function PdfToJpg() {
   const [pdfFile, setPdfFile] = useState(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [conversionMessage, setConversionMessage] = useState("");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -32,6 +33,7 @@ export default function PdfToJpg() {
   const handleConvert = async () => {
     if (!pdfFile) return;
     setIsConverting(true);
+    setConversionMessage("Converting PDF file. The converted images will be automatically downloaded when complete...");
     const formData = new FormData();
     formData.append("file", pdfFile);
 
@@ -43,7 +45,6 @@ export default function PdfToJpg() {
         method: "POST",
         body: formData,
         headers: {
-          // Don't set Content-Type header, let the browser set it with the boundary
           'Accept': 'application/json, application/zip',
         },
       });
@@ -59,15 +60,21 @@ export default function PdfToJpg() {
       const blob = await response.blob();
       console.log("Received blob:", blob.type, blob.size);
       
+      setConversionMessage("Conversion complete. Starting download...");
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = "converted.zip";
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setConversionMessage("");
+      }, 3000);
     } catch (err) {
       console.error("Conversion error:", err);
-      alert("Error converting PDF: " + err.message);
+      setConversionMessage("Error during conversion: " + err.message);
     } finally {
       setIsConverting(false);
     }
@@ -110,21 +117,35 @@ export default function PdfToJpg() {
         )}
       </div>
 
-      <div className="mt-4 flex gap-4 justify-center">
-        <button
-          onClick={handleConvert}
-          disabled={!pdfFile || isConverting}
-          className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
-        >
-          {isConverting ? "Converting..." : "Convert Now"}
-        </button>
-        <button
-          onClick={handleReset}
-          disabled={!pdfFile}
-          className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
-        >
-          Reset
-        </button>
+      <div className="mt-4 flex flex-col items-center gap-4">
+        {isConverting && (
+          <div className="w-full max-w-md">
+            <div className="h-2 bg-gray-700 rounded overflow-hidden">
+              <div className="h-full bg-blue-500 animate-pulse"></div>
+            </div>
+          </div>
+        )}
+        
+        {conversionMessage && (
+          <p className="text-sm text-gray-300">{conversionMessage}</p>
+        )}
+
+        <div className="flex gap-4">
+          <button
+            onClick={handleConvert}
+            disabled={!pdfFile || isConverting}
+            className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50 min-w-[120px]"
+          >
+            {isConverting ? "Converting..." : "Convert Now"}
+          </button>
+          <button
+            onClick={handleReset}
+            disabled={!pdfFile}
+            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
+          >
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   );
