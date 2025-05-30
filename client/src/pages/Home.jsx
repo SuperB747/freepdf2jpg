@@ -2,7 +2,7 @@ import AdUnit from '../components/AdUnit';
 
 export default function Home() {
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4">
       <h1 className="text-3xl font-bold text-white mb-6">Free PDF to JPG & JPG to PDF Converter</h1>
       
       <AdUnit slot="1234567890" /> {/* Replace with your actual ad slot ID */}
