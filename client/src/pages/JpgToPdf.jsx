@@ -144,7 +144,7 @@ export default function JpgToPdf() {
         </Droppable>
       </DragDropContext>
 
-      <div className="flex gap-4 mt-4">
+      <div className="flex gap-4 mt-4 justify-center">
         <button
           onClick={handleConvert}
           disabled={jpgFiles.length === 0 || isConverting}

@@ -31,7 +31,7 @@ export default function PdfToJpg() {
     if (!pdfFile) return;
     setIsConverting(true);
     const formData = new FormData();
-    formData.append("pdf", pdfFile);
+    formData.append("file", pdfFile);
 
     try {
       const response = await fetch("http://localhost:5001/api/pdf-to-jpg", {
