@@ -107,7 +107,7 @@ export default function JpgToPdf() {
                 />
               </label>
 
-              <div className="mt-4 max-h-48 overflow-y-auto flex flex-col items-start justify-center mx-auto w-full max-w-xs">
+              <div className="mt-2 max-h-48 overflow-y-auto flex flex-col items-start justify-center mx-auto w-full max-w-xs">
                 {jpgFiles.map((entry, index) => (
                   <Draggable key={entry.id} draggableId={entry.id} index={index}>
                     {(provided, snapshot) => (
@@ -115,21 +115,22 @@ export default function JpgToPdf() {
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className="w-full max-w-md text-sm text-white px-3 py-2 flex items-center justify-start"
+                        className="w-full max-w-md text-sm text-white py-1 flex items-center justify-start"
                         style={{
-                          backgroundColor: "transparent",
+                          backgroundColor: snapshot.isDragging ? "rgba(59, 130, 246, 0.1)" : "transparent",
                           border: "none",
                           cursor: "grab",
                           ...provided.draggableProps.style,
                         }}
                       >
-                        <span className="flex items-center gap-2">
+                        <span className="flex items-center gap-1 w-full">
+                          <span className="text-gray-400 text-xs mr-1">{index + 1}.</span>
                           <span className="truncate inline-block max-w-[180px] align-middle overflow-hidden whitespace-nowrap text-ellipsis">
                             {entry.file.name}
                           </span>
                           <button
                             onClick={() => handleRemoveFile(index)}
-                            className="text-red-400 hover:text-red-600"
+                            className="text-red-400 hover:text-red-600 ml-auto"
                             aria-label="Remove"
                           >
                             🗑️
