@@ -22,6 +22,8 @@ def convert_pdf_to_jpg():
         return "Invalid file type", 400
 
     pdf_bytes = pdf_file.read()
+    if not pdf_bytes:
+        return "PDF file is empty", 400
     print("파일 수신 완료:", pdf_file.filename)
     print("PDF 바이트 길이:", len(pdf_bytes))
 
@@ -45,7 +47,8 @@ def convert_pdf_to_jpg():
             mimetype="application/zip"
         )
     except Exception as e:
-        return str(e), 500
+        print("PDF 변환 오류:", str(e))
+        return f"Error converting PDF: {str(e)}", 500
 
 @app.route("/api/jpg-to-pdf", methods=["POST"])
 def convert_jpg_to_pdf():
