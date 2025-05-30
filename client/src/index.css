@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #1e1e1e;
+  color: white;
+  font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Ensure draggable elements maintain pointer events */
+[data-rbd-draggable-context-id] * {
+  pointer-events: auto !important;
+}
