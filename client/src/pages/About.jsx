@@ -8,7 +8,7 @@ export default function About() {
         FreePDF2JPG is a modern and secure web application designed to help you easily convert your PDF files to JPG images and vice versa. 
         Our service is completely free to use, and your privacy is our top priority. When you upload a file, it is securely processed through our server and 
         permanently deleted right after the conversion is completed — no backups, no tracking. You can use our tool with peace of mind, knowing your files 
-        stay safe and private.
+        stay safe and private..
       </p>
 
       <div className="mb-6">
