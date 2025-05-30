@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com:5001";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
 
 export default function PdfToJpg() {
@@ -71,9 +71,35 @@ export default function PdfToJpg() {
 
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(xhr.response);
+            if (xhr.response.type === 'application/json') {
+              // If the response is JSON, it's probably an error
+              const reader = new FileReader();
+              reader.onload = () => {
+                const error = JSON.parse(reader.result);
+                reject(new Error(error.details || error.error || 'Conversion failed'));
+              };
+              reader.onerror = () => reject(new Error('Failed to read error response'));
+              reader.readAsText(xhr.response);
+            } else {
+              resolve(xhr.response);
+            }
           } else {
-            reject(new Error(xhr.responseText || 'Upload failed'));
+            if (xhr.responseType === 'blob') {
+              // Try to read error message from blob
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const error = JSON.parse(reader.result);
+                  reject(new Error(error.details || error.error || 'Upload failed'));
+                } catch {
+                  reject(new Error('Upload failed'));
+                }
+              };
+              reader.onerror = () => reject(new Error('Upload failed'));
+              reader.readAsText(xhr.response);
+            } else {
+              reject(new Error(xhr.responseText || 'Upload failed'));
+            }
           }
         };
 

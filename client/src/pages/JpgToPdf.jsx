@@ -116,9 +116,35 @@ export default function JpgToPdf() {
 
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(xhr.response);
+            if (xhr.response.type === 'application/json') {
+              // If the response is JSON, it's probably an error
+              const reader = new FileReader();
+              reader.onload = () => {
+                const error = JSON.parse(reader.result);
+                reject(new Error(error.details || error.error || 'Conversion failed'));
+              };
+              reader.onerror = () => reject(new Error('Failed to read error response'));
+              reader.readAsText(xhr.response);
+            } else {
+              resolve(xhr.response);
+            }
           } else {
-            reject(new Error(xhr.responseText || 'Upload failed'));
+            if (xhr.responseType === 'blob') {
+              // Try to read error message from blob
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const error = JSON.parse(reader.result);
+                  reject(new Error(error.details || error.error || 'Upload failed'));
+                } catch {
+                  reject(new Error('Upload failed'));
+                }
+              };
+              reader.onerror = () => reject(new Error('Upload failed'));
+              reader.readAsText(xhr.response);
+            } else {
+              reject(new Error(xhr.responseText || 'Upload failed'));
+            }
           }
         };
 
