@@ -1,0 +1,20 @@
+# FreePDF2JPG - PDF and JPG Conversion Tool
+User-agent: *
+Allow: /
+Allow: /pdf-to-jpg
+Allow: /jpg-to-pdf
+Allow: /about
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+# Prevent access to certain directories
+Disallow: /api/
+Disallow: /admin/
+Disallow: /temp/
+Disallow: /uploads/
+
+# Crawl-delay for all bots
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://freepdf2jpg.ca/sitemap.xml 

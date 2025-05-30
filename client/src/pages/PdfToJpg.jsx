@@ -6,6 +6,9 @@ export default function PdfToJpg() {
   const [pdfFile, setPdfFile] = useState(null);
   const [isConverting, setIsConverting] = useState(false);
   const [conversionMessage, setConversionMessage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -33,48 +36,75 @@ export default function PdfToJpg() {
   const handleConvert = async () => {
     if (!pdfFile) return;
     setIsConverting(true);
-    setConversionMessage("Converting PDF file. The converted images will be automatically downloaded when complete...");
+    setIsUploaded(false);
+    setUploadProgress(0);
+    setShowSuccess(false);
+    setConversionMessage("Uploading PDF file...");
+    
     const formData = new FormData();
     formData.append("file", pdfFile);
 
     try {
-      console.log("Sending file:", pdfFile.name);
-      console.log("File size:", pdfFile.size);
-      
-      const response = await fetch(`${API_URL}/api/pdf-to-jpg`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          'Accept': 'application/json, application/zip',
-        },
+      const response = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+            if (percentComplete === 100) {
+              setIsUploaded(true);
+              setConversionMessage("Converting PDF to images...");
+            }
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.response);
+          } else {
+            reject(new Error(xhr.responseText || 'Upload failed'));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Upload failed'));
+        };
+
+        xhr.open('POST', `${API_URL}/api/pdf-to-jpg`);
+        xhr.responseType = 'blob';
+        xhr.send(formData);
       });
 
-      console.log("Response status:", response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server error:", errorText);
-        throw new Error(errorText);
-      }
-
-      const blob = await response.blob();
+      const blob = response;
       console.log("Received blob:", blob.type, blob.size);
       
-      setConversionMessage("Conversion complete. Starting download...");
+      setConversionMessage("Conversion complete! Starting download...");
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = "converted.zip";
       a.click();
       window.URL.revokeObjectURL(url);
+
+      // Show success message
+      setIsConverting(false);
+      setShowSuccess(true);
+      setConversionMessage("Conversion completed successfully! Your download should begin automatically.");
       
-      // Clear message after 3 seconds
+      // Clear success state after 3 seconds
       setTimeout(() => {
+        setShowSuccess(false);
         setConversionMessage("");
+        setUploadProgress(0);
+        setIsUploaded(false);
       }, 3000);
     } catch (err) {
       console.error("Conversion error:", err);
       setConversionMessage("Error during conversion: " + err.message);
+      setUploadProgress(0);
+      setIsUploaded(false);
+      setShowSuccess(false);
     } finally {
       setIsConverting(false);
     }
@@ -118,16 +148,31 @@ export default function PdfToJpg() {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-4">
-        {isConverting && (
+        {(isConverting || showSuccess) && (
           <div className="w-full max-w-md">
-            <div className="h-2 bg-gray-700 rounded overflow-hidden">
-              <div className="h-full bg-blue-500 animate-pulse"></div>
+            <div className={`text-center text-sm mb-2 ${
+              showSuccess ? 'text-green-400' : 'text-gray-300'
+            }`}>
+              {conversionMessage}
             </div>
+            {isConverting && (
+              <>
+                <div className="h-2 bg-gray-700 rounded overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-300 ease-in-out bg-blue-500 ${
+                      isUploaded ? 'animate-pulse w-full' : ''
+                    }`}
+                    style={!isUploaded ? { width: `${uploadProgress}%` } : undefined}
+                  ></div>
+                </div>
+                {!isUploaded && (
+                  <div className="text-center text-sm text-gray-400 mt-1">
+                    {uploadProgress}%
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
-        
-        {conversionMessage && (
-          <p className="text-sm text-gray-300">{conversionMessage}</p>
         )}
 
         <div className="flex gap-4">
