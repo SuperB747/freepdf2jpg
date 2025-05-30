@@ -13,10 +13,10 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB 제한
 
 @app.route("/api/pdf-to-jpg", methods=["POST"])
 def convert_pdf_to_jpg():
-    if 'pdf' not in request.files:
+    if 'file' not in request.files:
         return "No PDF file uploaded", 400
 
-    pdf_file = request.files['pdf']
+    pdf_file = request.files['file']
     # Optional: file extension check
     if not pdf_file.filename.lower().endswith(".pdf"):
         return "Invalid file type", 400
