@@ -6,6 +6,8 @@ import {
 } from "@hello-pangea/dnd";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
+const MAX_TOTAL_SIZE = 15 * 1024 * 1024; // 15MB total limit
 
 export default function JpgToPdf() {
   const [jpgFiles, setJpgFiles] = useState([]);
@@ -16,13 +18,63 @@ export default function JpgToPdf() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [conversionMessage, setConversionMessage] = useState("");
 
+  const getTotalSize = (files) => {
+    return files.reduce((total, entry) => total + entry.file.size, 0);
+  };
+
   const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files).map((file, i) => ({
+    const selectedFiles = Array.from(e.target.files);
+    
+    // Check individual file sizes
+    const oversizedFiles = selectedFiles.filter(file => file.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert(`Some files exceed the 15MB limit:\n${oversizedFiles.map(f => f.name).join('\n')}`);
+      return;
+    }
+
+    // Check total size including existing files
+    const newFiles = selectedFiles.map((file, i) => ({
       id: `file-${uniqueId + i}`,
       file,
     }));
+    const totalSize = getTotalSize([...jpgFiles, ...newFiles]);
+    
+    if (totalSize > MAX_TOTAL_SIZE) {
+      alert("Total file size exceeds 15MB limit. Please remove some files first.");
+      return;
+    }
+
     setUniqueId((prev) => prev + newFiles.length);
     setJpgFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    
+    // Check individual file sizes
+    const oversizedFiles = droppedFiles.filter(file => file.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert(`Some files exceed the 15MB limit:\n${oversizedFiles.map(f => f.name).join('\n')}`);
+      return;
+    }
+
+    // Check total size including existing files
+    const newFiles = droppedFiles.map((file, i) => ({
+      id: `file-${uniqueId + i}`,
+      file,
+    }));
+    const totalSize = getTotalSize([...jpgFiles, ...newFiles]);
+    
+    if (totalSize > MAX_TOTAL_SIZE) {
+      alert("Total file size exceeds 15MB limit. Please remove some files first.");
+      return;
+    }
+
+    if (droppedFiles.length > 0) {
+      setUniqueId((prev) => prev + newFiles.length);
+      setJpgFiles((prev) => [...prev, ...newFiles]);
+    }
   };
 
   const handleRemoveFile = (index) => {
@@ -123,84 +175,80 @@ export default function JpgToPdf() {
   };
 
   return (
-    <div className="p-4 bg-[#1f1f1f] min-h-screen">
-      <h1 className="text-2xl font-bold text-white">JPG to PDF Converter</h1>
-      <p className="mt-2 text-gray-300">
-        Combine multiple JPG images into a single PDF document. Secure, fast, and easy.
-      </p>
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+        <h2 className="text-xl font-semibold text-white mb-4">JPG to PDF Converter</h2>
+        <p className="text-gray-300 mb-6">
+          Combine multiple JPG images into a single PDF document. Maximum total size: 15MB.
+          Drag and drop to reorder images.
+        </p>
 
-      <h2 className="mt-6 text-lg font-semibold text-white">How to Use</h2>
-      <ul className="list-disc list-inside text-gray-300 mt-2">
-        <li>Select JPG files using the area below</li>
-        <li>Drag and drop multiple JPG files to upload</li>
-        <li>Reorder images using drag and drop</li>
-        <li>Click "Convert Now" to merge into a single PDF</li>
-        <li>The result will be downloaded automatically</li>
-      </ul>
-
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="jpgList">
-          {(provided) => (
-            <div
-              className="mt-6 border-2 border-dashed border-gray-400 rounded-lg p-6 text-center text-gray-300"
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              <p className="mb-2">Drag & drop JPG files here, or</p>
-              <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer">
-                Select Files
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="jpgList">
+            {(provided) => (
+              <div
+                className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center mb-6"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
                 <input
                   type="file"
                   accept="image/jpeg"
                   multiple
                   onChange={handleFileChange}
                   className="hidden"
+                  id="jpgInput"
                 />
-              </label>
+                <label
+                  htmlFor="jpgInput"
+                  className="block cursor-pointer"
+                >
+                  <div className="mb-4">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-300 mb-2">Drag & drop JPG files here, or</p>
+                  <span className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors inline-block">
+                    Select JPG Files
+                  </span>
+                </label>
 
-              <div className="mt-2 max-h-48 overflow-y-auto flex flex-col items-start justify-center mx-auto w-full max-w-xs">
-                {jpgFiles.map((entry, index) => (
-                  <Draggable key={entry.id} draggableId={entry.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="w-full max-w-md text-sm text-white py-1 flex items-center justify-start"
-                        style={{
-                          backgroundColor: snapshot.isDragging ? "rgba(59, 130, 246, 0.1)" : "transparent",
-                          border: "none",
-                          cursor: "grab",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        <span className="flex items-center gap-1 w-full">
-                          <span className="text-gray-400 text-xs mr-1">{index + 1}.</span>
-                          <span className="truncate inline-block max-w-[180px] align-middle overflow-hidden whitespace-nowrap text-ellipsis">
-                            {entry.file.name}
+                <div className="mt-6 max-h-48 overflow-y-auto">
+                  {jpgFiles.map((entry, index) => (
+                    <Draggable key={entry.id} draggableId={entry.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`flex items-center justify-between p-2 mb-2 rounded ${
+                            snapshot.isDragging ? 'bg-gray-700' : 'bg-gray-900'
+                          }`}
+                        >
+                          <span className="flex items-center text-gray-300">
+                            <span className="mr-2 text-sm text-gray-500">{index + 1}.</span>
+                            <span className="truncate max-w-[200px]">{entry.file.name}</span>
                           </span>
                           <button
                             onClick={() => handleRemoveFile(index)}
-                            className="text-red-400 hover:text-red-600 ml-auto"
-                            aria-label="Remove"
+                            className="text-red-400 hover:text-red-300 ml-2"
                           >
-                            🗑️
+                            ✕
                           </button>
-                        </span>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
               </div>
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+            )}
+          </Droppable>
+        </DragDropContext>
 
-      <div className="mt-4 flex flex-col items-center gap-4">
         {(isConverting || showSuccess) && (
-          <div className="w-full max-w-md">
+          <div className="mb-6">
             <div className={`text-center text-sm mb-2 ${
               showSuccess ? 'text-green-400' : 'text-gray-300'
             }`}>
@@ -226,21 +274,63 @@ export default function JpgToPdf() {
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex justify-center gap-4">
           <button
             onClick={handleConvert}
             disabled={jpgFiles.length === 0 || isConverting}
-            className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50 min-w-[120px]"
+            className="px-6 py-2 bg-green-500 text-white rounded disabled:opacity-50 hover:bg-green-600 transition-colors"
           >
-            {isConverting ? "Converting..." : "Convert Now"}
+            {isConverting ? "Converting..." : "Convert to PDF"}
           </button>
-          <button
-            onClick={handleReset}
-            disabled={jpgFiles.length === 0}
-            className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
-          >
-            Reset
-          </button>
+          {jpgFiles.length > 0 && (
+            <button
+              onClick={handleReset}
+              disabled={isConverting}
+              className="px-6 py-2 bg-gray-600 text-white rounded disabled:opacity-50 hover:bg-gray-700 transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* How to Use Section */}
+      <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-4">How to Use JPG to PDF Converter</h2>
+        
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-white mb-3">Step-by-Step Guide</h3>
+            <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <li>Click "Select JPG Files" or drag and drop multiple JPG images into the upload area</li>
+              <li>Your selected images will appear in a list below the upload area</li>
+              <li>Drag and drop the images in the list to reorder them as needed</li>
+              <li>Click the "Convert to PDF" button to combine the images</li>
+              <li>Your combined PDF will download automatically when ready</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-white mb-3">Features</h3>
+            <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <li>Combine multiple JPG images into a single PDF</li>
+              <li>Drag-and-drop interface for easy file ordering</li>
+              <li>Maintain original image quality</li>
+              <li>Secure and private conversion</li>
+              <li>No file limit - convert as many images as you need</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-white mb-3">Tips</h3>
+            <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <li>Images will appear in the PDF in the same order as shown in the list</li>
+              <li>You can remove individual images by clicking the "✕" button</li>
+              <li>Use the Reset button to clear all selected images at once</li>
+              <li>For best results, use high-quality JPG images</li>
+              <li>The conversion time depends on the number and size of your images</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
