@@ -5,7 +5,7 @@ import {
   Draggable,
 } from "@hello-pangea/dnd";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com:5001";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
 const MAX_TOTAL_SIZE = 15 * 1024 * 1024; // 15MB total limit
 
@@ -160,7 +160,6 @@ export default function JpgToPdf() {
       setUploadProgress(0);
       setIsUploaded(false);
       setShowSuccess(false);
-    } finally {
       setIsConverting(false);
     }
   };
@@ -226,13 +225,13 @@ export default function JpgToPdf() {
                             snapshot.isDragging ? 'bg-gray-700' : 'bg-gray-900'
                           }`}
                         >
-                          <span className="flex items-center text-gray-300">
-                            <span className="mr-2 text-sm text-gray-500">{index + 1}.</span>
-                            <span className="truncate max-w-[200px]">{entry.file.name}</span>
+                          <span className="flex items-center text-gray-300 flex-grow min-w-0 mr-2">
+                            <span className="mr-2 text-sm text-gray-500 flex-shrink-0">{index + 1}.</span>
+                            <span className="truncate">{entry.file.name}</span>
                           </span>
                           <button
                             onClick={() => handleRemoveFile(index)}
-                            className="text-red-400 hover:text-red-300 ml-2"
+                            className="text-red-400 hover:text-red-300 flex-shrink-0"
                           >
                             ✕
                           </button>

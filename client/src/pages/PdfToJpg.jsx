@@ -115,7 +115,6 @@ export default function PdfToJpg() {
       setUploadProgress(0);
       setIsUploaded(false);
       setShowSuccess(false);
-    } finally {
       setIsConverting(false);
     }
   };
