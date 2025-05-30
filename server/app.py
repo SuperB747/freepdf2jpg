@@ -8,7 +8,16 @@ import os
 import uuid
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://localhost:5173",  # Local development
+            "https://freepdf2jpg-client.onrender.com",  # Production
+        ],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB 제한
 
 @app.route("/api/pdf-to-jpg", methods=["POST"])

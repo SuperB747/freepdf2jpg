@@ -5,6 +5,8 @@ import {
   Draggable,
 } from "@hello-pangea/dnd";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+
 export default function JpgToPdf() {
   const [jpgFiles, setJpgFiles] = useState([]);
   const [isConverting, setIsConverting] = useState(false);
@@ -37,7 +39,7 @@ export default function JpgToPdf() {
     });
 
     try {
-      const response = await fetch("http://localhost:5001/api/jpg-to-pdf", {
+      const response = await fetch(`${API_URL}/api/jpg-to-pdf`, {
         method: "POST",
         body: formData,
       });

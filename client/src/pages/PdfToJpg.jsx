@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+
 export default function PdfToJpg() {
   const [pdfFile, setPdfFile] = useState(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -34,7 +36,7 @@ export default function PdfToJpg() {
     formData.append("file", pdfFile);
 
     try {
-      const response = await fetch("http://localhost:5001/api/pdf-to-jpg", {
+      const response = await fetch(`${API_URL}/api/pdf-to-jpg`, {
         method: "POST",
         body: formData,
       });
