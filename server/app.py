@@ -5,11 +5,9 @@ import io
 import zipfile
 import os
 import tempfile
-import magic
 import logging
 import sys
 import datetime
-from PyPDF2 import PdfReader
 import fitz  # PyMuPDF
 import shutil
 
