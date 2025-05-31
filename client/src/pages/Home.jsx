@@ -1,10 +1,6 @@
-import AdUnit from '../components/AdUnit';
-
 export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 pt-2">
-      <AdUnit slot="1234567890" className="mb-2" />
-      
       <section className="mb-4">
         <h2 className="text-2xl font-semibold text-white mb-2">Convert Your Files for Free</h2>
         <p className="text-gray-300 mb-3">
@@ -31,8 +27,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <AdUnit slot="9876543210" format="rectangle" className="mb-2" />
 
       <section className="mb-4">
         <h2 className="text-2xl font-semibold text-white mb-2">Why Choose Our Converter?</h2>
@@ -61,8 +55,6 @@ export default function Home() {
           <li>Download your converted file(s)</li>
         </ol>
       </section>
-
-      <AdUnit slot="5432109876" className="mb-2" />
     </div>
   );
 }
