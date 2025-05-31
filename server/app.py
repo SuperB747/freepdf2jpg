@@ -67,9 +67,9 @@ def create_pdf_from_images(image_paths, output_path):
     if not image_paths:
         raise ValueError("No images provided")
     
-    # Letter size in pixels at 300 DPI
-    LETTER_WIDTH = int(8.5 * 300)  # 8.5 inches * 300 DPI = 2550 pixels
-    LETTER_HEIGHT = int(11 * 300)  # 11 inches * 300 DPI = 3300 pixels
+    # Letter size in pixels at 150 DPI
+    LETTER_WIDTH = int(8.5 * 150)  # 8.5 inches * 150 DPI = 1275 pixels
+    LETTER_HEIGHT = int(11 * 150)  # 11 inches * 150 DPI = 1650 pixels
     
     # Create PDF with the first image
     with Image.open(image_paths[0]) as first_img:
@@ -109,7 +109,7 @@ def create_pdf_from_images(image_paths, output_path):
         letter_page.save(
             output_path,
             "PDF",
-            resolution=300.0,
+            resolution=150.0,  # Set to 150 DPI
             save_all=True,
             append_images=[
                 process_image_for_pdf(img_path, LETTER_WIDTH, LETTER_HEIGHT)
