@@ -27,9 +27,9 @@ export default function Navigation() {
   return (
     <header className="bg-[#1f1f1f]">
       {/* Title Section */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl font-bold text-white">Free PDF to JPG & JPG to PDF Converter</h1>
-        <p className="text-gray-300 mt-2">Convert your files easily and securely</p>
+      <div className="text-center py-3">
+        <h1 className="text-2xl font-bold text-white">Free PDF to JPG & JPG to PDF Converter</h1>
+        <p className="text-gray-300 mt-1">Convert your files easily and securely</p>
       </div>
 
       {/* Navigation Bar */}
@@ -39,7 +39,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/"
-                className={`text-white px-6 py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/')}`}
+                className={`text-white px-4 py-2 inline-block hover:bg-blue-600 transition-colors ${isActive('/')}`}
               >
                 Home
               </Link>
@@ -47,7 +47,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/about"
-                className={`text-white px-6 py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/about')}`}
+                className={`text-white px-4 py-2 inline-block hover:bg-blue-600 transition-colors ${isActive('/about')}`}
               >
                 About
               </Link>
@@ -58,7 +58,7 @@ export default function Navigation() {
               onMouseLeave={() => setIsToolsOpen(false)}
             >
               <button
-                className={`text-white px-6 py-4 inline-block hover:bg-blue-600 transition-colors ${
+                className={`text-white px-4 py-2 inline-block hover:bg-blue-600 transition-colors ${
                   isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
                 }`}
                 onClick={() => setIsToolsOpen(!isToolsOpen)}
@@ -69,12 +69,12 @@ export default function Navigation() {
               </button>
               {isToolsOpen && (
                 <ul
-                  className="absolute left-0 w-48 bg-gray-800 shadow-lg py-2 z-50"
+                  className="absolute left-0 w-48 bg-gray-800 shadow-lg py-1 z-50"
                 >
                   <li>
                     <Link
                       to="/pdf-to-jpg"
-                      className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
+                      className={`block px-3 py-1 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
                       onClick={() => setIsToolsOpen(false)}
                     >
                       PDF to JPG
@@ -83,7 +83,7 @@ export default function Navigation() {
                   <li>
                     <Link
                       to="/jpg-to-pdf"
-                      className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
+                      className={`block px-3 py-1 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
                       onClick={() => setIsToolsOpen(false)}
                     >
                       JPG to PDF
@@ -95,7 +95,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/qa"
-                className={`text-white px-6 py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/qa')}`}
+                className={`text-white px-4 py-2 inline-block hover:bg-blue-600 transition-colors ${isActive('/qa')}`}
               >
                 Q&A
               </Link>
@@ -103,7 +103,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/contact"
-                className={`text-white px-6 py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/contact')}`}
+                className={`text-white px-4 py-2 inline-block hover:bg-blue-600 transition-colors ${isActive('/contact')}`}
               >
                 Contact Us
               </Link>
