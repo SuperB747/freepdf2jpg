@@ -184,105 +184,121 @@ def convert_pdf_to_jpg():
 
 @app.route("/api/jpg-to-pdf", methods=["POST"])
 def convert_jpg_to_pdf():
-    logger.info("Received JPG to PDF request")
+    logger.info("=== Starting JPG to PDF conversion ===")
     
     if 'images' not in request.files:
-        return jsonify({
-            "error": "No images uploaded",
-            "details": "Please select at least one JPG image to convert"
-        }), 400
+        logger.error("No images uploaded")
+        return jsonify({"error": "No images uploaded"}), 400
 
     image_files = request.files.getlist("images")
     if not image_files:
-        return jsonify({
-            "error": "No images uploaded",
-            "details": "Please select at least one JPG image to convert"
-        }), 400
+        logger.error("No images in request")
+        return jsonify({"error": "No images uploaded"}), 400
 
-    # Validate and process images
-    images = []
-    total_size = 0
+    logger.info(f"Received {len(image_files)} images")
 
     try:
-        for img_file in image_files:
-            # Check file extension
+        # Create temporary directory
+        temp_dir = tempfile.mkdtemp(prefix='jpg2pdf_')
+        logger.info(f"Created temporary directory: {temp_dir}")
+
+        # Save and process images
+        processed_images = []
+        total_size = 0
+
+        for i, img_file in enumerate(image_files, 1):
             if not img_file.filename.lower().endswith(('.jpg', '.jpeg')):
-                return jsonify({
-                    "error": "Invalid file type",
-                    "details": f"File '{img_file.filename}' is not a JPG image"
-                }), 400
+                logger.error(f"Invalid file type: {img_file.filename}")
+                continue
 
-            # Read image content
-            img_content = img_file.read()
-            file_size = len(img_content)
+            # Save image to temp directory
+            img_path = os.path.join(temp_dir, f"image_{i}.jpg")
+            img_file.save(img_path)
+            file_size = os.path.getsize(img_path)
+            logger.info(f"Saved image {i}: {img_path} (size: {file_size} bytes)")
+
+            if file_size == 0:
+                logger.error(f"Empty image file: {img_file.filename}")
+                continue
+
             total_size += file_size
+            if total_size > MAX_TOTAL_JPG_SIZE:
+                logger.error("Total size exceeds limit")
+                return jsonify({"error": "Total file size exceeds 15MB limit"}), 413
 
-            # Check individual file size
-            if file_size > MAX_PDF_SIZE:
-                return jsonify({
-                    "error": "File too large",
-                    "details": f"Image '{img_file.filename}' exceeds 15MB limit"
-                }), 413
+            try:
+                # Open and verify image
+                with Image.open(img_path) as img:
+                    # Convert to RGB if necessary
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode == 'P':
+                            img = img.convert('RGBA')
+                        rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                        rgb_img.save(img_path, 'JPEG', quality=95)
+                        logger.info(f"Converted image {i} to RGB")
+                    processed_images.append(img_path)
+            except Exception as e:
+                logger.error(f"Failed to process image {img_file.filename}: {str(e)}")
+                continue
 
-            # Validate JPEG content
-            if not is_valid_jpeg(img_content):
-                return jsonify({
-                    "error": "Invalid JPEG file",
-                    "details": f"File '{img_file.filename}' is not a valid JPEG image"
-                }), 400
+        if not processed_images:
+            logger.error("No valid images to process")
+            return jsonify({"error": "No valid images were uploaded"}), 400
 
-            # Create PIL Image from bytes
-            img_buffer = io.BytesIO(img_content)
-            img = Image.open(img_buffer)
-            
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            
-            images.append(img)
-            logger.info(f"Processed image: {img_file.filename} ({file_size / 1024:.1f}KB)")
-
-        # Check total size
-        if total_size > MAX_TOTAL_JPG_SIZE:
-            return jsonify({
-                "error": "Total size too large",
-                "details": f"Combined file size exceeds 15MB limit"
-            }), 413
+        logger.info(f"Successfully processed {len(processed_images)} images")
 
         # Create PDF
-        pdf_buffer = io.BytesIO()
-        if images:
-            images[0].save(
-                pdf_buffer,
-                format="PDF",
-                save_all=True,
-                append_images=images[1:],
-                resolution=200.0,
-                quality=90,
-                optimize=True
-            )
-            pdf_buffer.seek(0)
-            
-            pdf_size = len(pdf_buffer.getvalue())
-            logger.info(f"Created PDF (size: {pdf_size / 1024:.1f}KB)")
+        pdf_path = os.path.join(temp_dir, "output.pdf")
+        logger.info("Creating PDF...")
+
+        try:
+            # Use first image to get target size
+            with Image.open(processed_images[0]) as first_img:
+                pdf_size = first_img.size
+
+            # Create PDF with consistent page sizes
+            with Image.open(processed_images[0]) as first_img:
+                first_img.save(
+                    pdf_path,
+                    "PDF",
+                    resolution=300.0,
+                    save_all=True,
+                    append_images=[Image.open(img_path).resize(pdf_size) for img_path in processed_images[1:]]
+                )
+
+            pdf_size = os.path.getsize(pdf_path)
+            logger.info(f"Created PDF: {pdf_path} (size: {pdf_size} bytes)")
 
             if pdf_size == 0:
-                raise Exception("Generated PDF file is empty")
+                logger.error("Generated PDF is empty")
+                return jsonify({"error": "Failed to create PDF"}), 500
 
+            # Send the PDF file
+            logger.info("Sending PDF response...")
             return send_file(
-                pdf_buffer,
+                pdf_path,
+                mimetype='application/pdf',
                 as_attachment=True,
-                download_name="converted.pdf",
-                mimetype="application/pdf"
+                download_name='combined.pdf'
             )
-        else:
-            raise Exception("No valid images were processed")
+
+        except Exception as e:
+            logger.error(f"Failed to create PDF: {str(e)}")
+            return jsonify({"error": f"Failed to create PDF: {str(e)}"}), 500
 
     except Exception as e:
-        logger.error(f"Conversion error: {str(e)}", exc_info=True)
-        return jsonify({
-            "error": "Conversion failed",
-            "details": str(e)
-        }), 500
+        logger.error(f"Conversion failed: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Clean up
+        try:
+            if 'temp_dir' in locals():
+                shutil.rmtree(temp_dir)
+                logger.info("Cleaned up temporary directory")
+        except Exception as e:
+            logger.error(f"Failed to clean up: {str(e)}")
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', '10000'))
