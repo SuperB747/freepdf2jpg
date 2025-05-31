@@ -11,6 +11,7 @@ import sys
 import datetime
 from PyPDF2 import PdfReader
 import fitz  # PyMuPDF
+import shutil
 
 # Configure logging
 logging.basicConfig(
@@ -23,24 +24,29 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+# Constants
+MAX_FILE_SIZE = 15 * 1024 * 1024  # 15MB limit for both PDF and JPG files
 
-# Get allowed origins from environment variable with default
-allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
-logger.info(f"Allowed origins: {allowed_origins}")
+def create_app():
+    app = Flask(__name__)
+    
+    # Configure CORS
+    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+    logger.info(f"Allowed origins: {allowed_origins}")
+    CORS(app, resources={
+        r"/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "OPTIONS"],
+            "allow_headers": ["Content-Type"]
+        }
+    })
+    
+    # Configure upload size limit
+    app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+    
+    return app
 
-CORS(app, resources={
-    r"/*": {
-        "origins": allowed_origins,
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
-
-# File size limits
-MAX_PDF_SIZE = 15 * 1024 * 1024  # 15MB for PDF files
-MAX_TOTAL_JPG_SIZE = 15 * 1024 * 1024  # 15MB for combined JPG files
-app.config['MAX_CONTENT_LENGTH'] = MAX_TOTAL_JPG_SIZE
+app = create_app()
 
 def convert_pdf_to_images(pdf_path, output_dir):
     """Convert PDF to images using PyMuPDF (fitz)"""
@@ -57,6 +63,29 @@ def convert_pdf_to_images(pdf_path, output_dir):
     
     pdf_document.close()
     return images
+
+def create_pdf_from_images(image_paths, output_path):
+    """Create PDF from multiple images"""
+    if not image_paths:
+        raise ValueError("No images provided")
+        
+    # Use first image to get target size
+    with Image.open(image_paths[0]) as first_img:
+        target_size = first_img.size
+        
+        # Create PDF
+        first_img.save(
+            output_path,
+            "PDF",
+            resolution=300.0,
+            save_all=True,
+            append_images=[
+                Image.open(img_path).resize(target_size)
+                for img_path in image_paths[1:]
+            ]
+        )
+    
+    return output_path
 
 @app.route("/health", methods=["GET", "HEAD"])
 def health_check():
@@ -84,7 +113,7 @@ def convert_pdf_to_jpg():
     logger.info("=== Starting PDF to JPG conversion ===")
     
     if 'file' not in request.files:
-        logger.error("No file part in the request")
+        logger.error("No file in request")
         return jsonify({"error": "No file part"}), 400
         
     file = request.files['file']
@@ -97,27 +126,25 @@ def convert_pdf_to_jpg():
         return jsonify({"error": "Only PDF files are allowed"}), 400
 
     try:
-        # Create a unique temporary directory
+        # Create temporary directory
         temp_dir = tempfile.mkdtemp(prefix='pdf2jpg_')
         logger.info(f"Created temporary directory: {temp_dir}")
 
-        # Save the uploaded PDF
+        # Save and process PDF
         pdf_path = os.path.join(temp_dir, 'input.pdf')
         file.save(pdf_path)
         pdf_size = os.path.getsize(pdf_path)
         logger.info(f"Saved PDF file: {pdf_path} (size: {pdf_size} bytes)")
 
         if pdf_size == 0:
-            logger.error("Uploaded PDF is empty")
+            logger.error("Empty PDF file")
             return jsonify({"error": "Empty PDF file"}), 400
 
-        # Create output directory for images
+        # Convert PDF to images
         images_dir = os.path.join(temp_dir, 'images')
         os.makedirs(images_dir)
-        logger.info(f"Created images directory: {images_dir}")
-
-        # Convert PDF to images
         logger.info("Starting PDF to image conversion...")
+        
         try:
             image_files = convert_pdf_to_images(pdf_path, images_dir)
             logger.info(f"Successfully converted PDF to {len(image_files)} images")
@@ -125,62 +152,45 @@ def convert_pdf_to_jpg():
             logger.error(f"Failed to convert PDF: {str(e)}")
             return jsonify({"error": "Failed to convert PDF"}), 500
 
-        # Verify images were created
-        if not image_files:
-            logger.error("No images were generated")
-            return jsonify({"error": "No images were generated from PDF"}), 500
-
-        # Log image files and their sizes
-        for img_path in image_files:
-            size = os.path.getsize(img_path)
-            logger.info(f"Generated image: {img_path} (size: {size} bytes)")
-            if size == 0:
-                logger.error(f"Generated empty image: {img_path}")
-                return jsonify({"error": "Generated empty image file"}), 500
-
         # Create ZIP file
         zip_path = os.path.join(temp_dir, 'converted.zip')
         logger.info(f"Creating ZIP file: {zip_path}")
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for i, img_path in enumerate(image_files, 1):
-                arcname = f'page_{i}.jpg'
-                logger.info(f"Adding to ZIP: {img_path} as {arcname}")
-                zipf.write(img_path, arcname)
-                
-        # Verify ZIP file
+                size = os.path.getsize(img_path)
+                if size == 0:
+                    logger.error(f"Empty image generated: page_{i}.jpg")
+                    continue
+                logger.info(f"Adding to ZIP: page_{i}.jpg (size: {size} bytes)")
+                zipf.write(img_path, f"page_{i}.jpg")
+
+        # Verify and send ZIP
         zip_size = os.path.getsize(zip_path)
-        logger.info(f"Created ZIP file: {zip_path} (size: {zip_size} bytes)")
-        
         if zip_size == 0:
-            logger.error("Created ZIP file is empty")
+            logger.error("Generated ZIP file is empty")
             return jsonify({"error": "Failed to create ZIP file"}), 500
 
-        # Read ZIP file into memory
-        with open(zip_path, 'rb') as f:
-            zip_data = f.read()
-            
-        # Clean up
-        import shutil
-        shutil.rmtree(temp_dir)
-        logger.info("Cleaned up temporary directory")
-
-        # Send response
-        logger.info(f"Sending ZIP file (size: {len(zip_data)} bytes)")
+        logger.info(f"Sending ZIP file (size: {zip_size} bytes)")
         return send_file(
-            io.BytesIO(zip_data),
+            zip_path,
             mimetype='application/zip',
             as_attachment=True,
             download_name=f"{os.path.splitext(file.filename)[0]}_converted.zip"
         )
 
     except Exception as e:
-        logger.error(f"Conversion failed: {str(e)}", exc_info=True)
-        # Clean up on error
-        if 'temp_dir' in locals():
-            shutil.rmtree(temp_dir)
-            logger.info("Cleaned up temporary directory after error")
+        logger.error(f"Conversion failed: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        # Clean up
+        try:
+            if 'temp_dir' in locals():
+                shutil.rmtree(temp_dir)
+                logger.info("Cleaned up temporary directory")
+        except Exception as e:
+            logger.error(f"Failed to clean up: {str(e)}")
 
 @app.route("/api/jpg-to-pdf", methods=["POST"])
 def convert_jpg_to_pdf():
@@ -211,25 +221,23 @@ def convert_jpg_to_pdf():
                 logger.error(f"Invalid file type: {img_file.filename}")
                 continue
 
-            # Save image to temp directory
+            # Save and check image
             img_path = os.path.join(temp_dir, f"image_{i}.jpg")
             img_file.save(img_path)
             file_size = os.path.getsize(img_path)
-            logger.info(f"Saved image {i}: {img_path} (size: {file_size} bytes)")
-
+            
             if file_size == 0:
                 logger.error(f"Empty image file: {img_file.filename}")
                 continue
 
             total_size += file_size
-            if total_size > MAX_TOTAL_JPG_SIZE:
+            if total_size > MAX_FILE_SIZE:
                 logger.error("Total size exceeds limit")
                 return jsonify({"error": "Total file size exceeds 15MB limit"}), 413
 
             try:
-                # Open and verify image
+                # Process image
                 with Image.open(img_path) as img:
-                    # Convert to RGB if necessary
                     if img.mode in ('RGBA', 'LA', 'P'):
                         rgb_img = Image.new('RGB', img.size, (255, 255, 255))
                         if img.mode == 'P':
@@ -246,27 +254,12 @@ def convert_jpg_to_pdf():
             logger.error("No valid images to process")
             return jsonify({"error": "No valid images were uploaded"}), 400
 
-        logger.info(f"Successfully processed {len(processed_images)} images")
-
         # Create PDF
         pdf_path = os.path.join(temp_dir, "output.pdf")
         logger.info("Creating PDF...")
 
         try:
-            # Use first image to get target size
-            with Image.open(processed_images[0]) as first_img:
-                pdf_size = first_img.size
-
-            # Create PDF with consistent page sizes
-            with Image.open(processed_images[0]) as first_img:
-                first_img.save(
-                    pdf_path,
-                    "PDF",
-                    resolution=300.0,
-                    save_all=True,
-                    append_images=[Image.open(img_path).resize(pdf_size) for img_path in processed_images[1:]]
-                )
-
+            create_pdf_from_images(processed_images, pdf_path)
             pdf_size = os.path.getsize(pdf_path)
             logger.info(f"Created PDF: {pdf_path} (size: {pdf_size} bytes)")
 
@@ -274,7 +267,7 @@ def convert_jpg_to_pdf():
                 logger.error("Generated PDF is empty")
                 return jsonify({"error": "Failed to create PDF"}), 500
 
-            # Send the PDF file
+            # Send PDF
             logger.info("Sending PDF response...")
             return send_file(
                 pdf_path,
