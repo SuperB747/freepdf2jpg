@@ -1,5 +1,3 @@
-
-
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
@@ -13,6 +11,7 @@ WORKDIR /app
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     poppler-utils \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /app/requirements.txt
@@ -27,5 +26,5 @@ EXPOSE 5001
 # Set the FLASK_APP environment variable
 ENV FLASK_APP=app.py
 
-# Run the application using flask run
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
+# Run the application using gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "app:app"]
