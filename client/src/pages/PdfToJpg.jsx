@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com:5001";
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
 
 export default function PdfToJpg() {
