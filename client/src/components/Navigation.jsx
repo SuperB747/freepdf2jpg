@@ -27,13 +27,13 @@ export default function Navigation() {
   return (
     <header className="bg-[#1f1f1f]">
       {/* Title Section */}
-      <div className="text-center py-3">
-        <h1 className="text-3xl font-bold text-white">Free PDF to JPG & JPG to PDF Converter</h1>
-        <p className="text-gray-300 mt-1">Convert your files easily and securely</p>
+      <div className="text-center py-2">
+        <h1 className="text-3xl font-bold text-white leading-tight">Free PDF to JPG & JPG to PDF Converter</h1>
+        <p className="text-gray-300">Convert your files easily and securely</p>
       </div>
 
       {/* Navigation Bar */}
-      <nav className="bg-gray-800">
+      <nav className="bg-gray-800 mb-1">
         <div className="max-w-4xl mx-auto">
           <ul className="flex justify-center items-center">
             <li>

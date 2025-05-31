@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export default function AdUnit({ slot, format = 'auto' }) {
+export default function AdUnit({ slot, format = 'auto', className = '' }) {
   useEffect(() => {
     try {
       // AdSense 스크립트가 로드되었는지 확인
@@ -13,7 +13,7 @@ export default function AdUnit({ slot, format = 'auto' }) {
   }, []);
 
   return (
-    <div className="ad-container my-4">
+    <div className={`ad-container ${className}`}>
       <ins
         className="adsbygoogle"
         style={{ display: 'block' }}
