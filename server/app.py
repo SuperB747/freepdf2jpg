@@ -7,25 +7,38 @@ import zipfile
 import os
 import tempfile
 import magic
-import logging
+import logging.handlers
 import sys
 
 # Configure logging
+log_format = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    stream=sys.stdout
+    level=logging.DEBUG,  # Set to DEBUG for more detailed logs
+    format=log_format,
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.handlers.RotatingFileHandler(
+            'app.log',
+            maxBytes=10000000,  # 10MB
+            backupCount=3
+        )
+    ]
 )
+
+# Set third-party loggers to INFO to reduce noise
+logging.getLogger('PIL').setLevel(logging.INFO)
+logging.getLogger('pdf2image').setLevel(logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Get allowed origins from environment variable
+# Get allowed origins from environment variable with default
 allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
 logger.info(f"Allowed origins: {allowed_origins}")
 
 CORS(app, resources={
-    r"/*": {  # Allow CORS for all routes
+    r"/*": {
         "origins": allowed_origins,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
@@ -35,7 +48,29 @@ CORS(app, resources={
 # File size limits
 MAX_PDF_SIZE = 15 * 1024 * 1024  # 15MB for PDF files
 MAX_TOTAL_JPG_SIZE = 15 * 1024 * 1024  # 15MB for combined JPG files
-app.config['MAX_CONTENT_LENGTH'] = MAX_TOTAL_JPG_SIZE  # Maximum total request size
+app.config['MAX_CONTENT_LENGTH'] = MAX_TOTAL_JPG_SIZE
+
+# Configure Flask app
+app.config['UPLOAD_FOLDER'] = '/tmp'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+# Error handlers
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    logger.error("File too large error")
+    return jsonify({
+        "error": "File too large",
+        "details": "The file exceeds the maximum allowed size of 15MB"
+    }), 413
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    logger.error(f"Internal server error: {str(error)}", exc_info=True)
+    return jsonify({
+        "error": "Internal server error",
+        "details": "An unexpected error occurred. Please try again later."
+    }), 500
 
 def is_valid_pdf(file_content):
     """Check if the file content is actually a PDF."""
@@ -291,4 +326,12 @@ def convert_jpg_to_pdf():
         }), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    # Get port from environment variable with default
+    port = int(os.environ.get('PORT', 5001))
+    
+    # Log startup information
+    logger.info(f"Starting server on port {port}")
+    logger.info(f"Debug mode: {app.debug}")
+    logger.info(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
+    
+    app.run(host="0.0.0.0", port=port, debug=True)
