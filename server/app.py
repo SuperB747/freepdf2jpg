@@ -285,12 +285,6 @@ def convert_jpg_to_pdf():
         }), 500
 
 if __name__ == "__main__":
-    # Get port from environment variable with default
-    port = int(os.environ.get('PORT', 5001))
-    
-    # Log startup information
+    port = int(os.environ.get('PORT', '10000'))
     logger.info(f"Starting server on port {port}")
-    logger.info(f"Debug mode: {app.debug}")
-    logger.info(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
-    
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
