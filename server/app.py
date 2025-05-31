@@ -11,25 +11,20 @@ import logging.handlers
 import sys
 import glob
 import shutil
+import datetime
 
 # Configure logging
-log_format = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
 logging.basicConfig(
-    level=logging.DEBUG,  # Set to DEBUG for more detailed logs
-    format=log_format,
+    level=logging.INFO,
+    format='[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.handlers.RotatingFileHandler(
-            'app.log',
-            maxBytes=10000000,  # 10MB
-            backupCount=3
-        )
+        logging.StreamHandler(sys.stdout)
     ]
 )
 
-# Set third-party loggers to INFO to reduce noise
-logging.getLogger('PIL').setLevel(logging.INFO)
-logging.getLogger('pdf2image').setLevel(logging.INFO)
+# Set third-party loggers to WARNING to reduce noise
+logging.getLogger('PIL').setLevel(logging.WARNING)
+logging.getLogger('pdf2image').setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -86,17 +81,25 @@ def is_valid_jpeg(file_content):
     file_type = mime.from_buffer(file_content)
     return file_type.startswith('image/jpeg')
 
-@app.route("/", methods=["GET"])
+# Health check endpoint
+@app.route("/health", methods=["GET", "HEAD"])
+def health_check():
+    logger.info("Health check request received")
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    })
+
+@app.route("/", methods=["GET", "HEAD"])
 def index():
+    logger.info("Index request received")
     return jsonify({
         "status": "running",
+        "version": "1.0.0",
         "endpoints": {
+            "health": "/health",
             "pdf_to_jpg": "/api/pdf-to-jpg",
             "jpg_to_pdf": "/api/jpg-to-pdf"
-        },
-        "limits": {
-            "pdf_max_size": "15MB",
-            "jpg_total_max_size": "15MB"
         }
     })
 
