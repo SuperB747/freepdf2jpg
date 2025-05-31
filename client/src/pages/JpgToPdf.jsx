@@ -5,7 +5,7 @@ import {
   Draggable,
 } from "@hello-pangea/dnd";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg-server.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg.ca";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
 const MAX_TOTAL_SIZE = 15 * 1024 * 1024; // 15MB total limit
 

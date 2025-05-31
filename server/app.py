@@ -12,8 +12,7 @@ CORS(app, resources={
     r"/*": {  # Allow CORS for all routes
         "origins": [
             "http://localhost:5173",  # Local development
-            "https://freepdf2jpg-client.onrender.com",  # Production
-            "https://freepdf2jpg.onrender.com"  # Alternative production URL
+            "https://freepdf2jpg.ca"  # Production domain
         ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
