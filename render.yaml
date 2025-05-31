@@ -1,18 +1,42 @@
 services:
+  # Backend API Service
   - type: web
     name: freepdf2jpg-server
     env: docker
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./server/Dockerfile
     plan: free
     autoDeploy: true
     envVars:
       - key: PORT
         value: 5001
+      - key: FLASK_APP
+        value: app.py
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: ALLOWED_ORIGINS
+        value: https://freepdf2jpg.ca
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: https://freepdf2jpg.ca
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: /*
+
+  # Frontend Service
   - type: web
     name: freepdf2jpg-client
     env: node
-    buildCommand: npm run build
-    startCommand: serve -s dist
-    staticPublishPath: client/dist
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd client && npx serve -s dist
     plan: free
     autoDeploy: true
+    domains:
+      - freepdf2jpg.ca
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

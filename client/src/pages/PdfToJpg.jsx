@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://freepdf2jpg.ca";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
 
 export default function PdfToJpg() {
@@ -107,7 +107,7 @@ export default function PdfToJpg() {
           reject(new Error('Upload failed'));
         };
 
-        xhr.open('POST', `${API_URL}/api/pdf-to-jpg`);
+        xhr.open('POST', `${API_URL}/pdf-to-jpg`);
         xhr.responseType = 'blob';
         xhr.send(formData);
       });

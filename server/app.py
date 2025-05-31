@@ -19,12 +19,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Get allowed origins from environment variable
+allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+logger.info(f"Allowed origins: {allowed_origins}")
+
 CORS(app, resources={
     r"/*": {  # Allow CORS for all routes
-        "origins": [
-            "http://localhost:5173",  # Local development
-            "https://freepdf2jpg.ca"  # Production domain
-        ],
+        "origins": allowed_origins,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
