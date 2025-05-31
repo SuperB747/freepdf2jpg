@@ -6,6 +6,7 @@ import io
 import zipfile
 import os
 import uuid
+import tempfile
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -79,29 +80,59 @@ def convert_pdf_to_jpg():
 
     try:
         print("Starting PDF conversion...")
-        images = convert_from_bytes(pdf_bytes, dpi=150)
-        print(f"Converted {len(images)} pages")
+        # Create a temporary directory for poppler output
+        with tempfile.TemporaryDirectory() as temp_dir:
+            print(f"Created temp directory: {temp_dir}")
+            
+            # Save PDF bytes to a temporary file
+            temp_pdf_path = os.path.join(temp_dir, "temp.pdf")
+            with open(temp_pdf_path, "wb") as f:
+                f.write(pdf_bytes)
+            print(f"Saved PDF to temporary file: {temp_pdf_path}")
+            
+            # Convert PDF to images with more detailed options
+            images = convert_from_bytes(
+                pdf_bytes,
+                dpi=200,  # Increased DPI for better quality
+                fmt="jpeg",
+                thread_count=2,
+                use_pdftocairo=True,
+                paths_only=False
+            )
+            print(f"Converted {len(images)} pages")
 
-        # Create ZIP file
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-            for i, img in enumerate(images):
-                img_io = io.BytesIO()
-                img.save(img_io, format="JPEG", quality=85)  # Slightly reduced quality for better file size
-                img_io.seek(0)
-                zip_file.writestr(f"page_{i+1}.jpg", img_io.read())
-                print(f"Added page {i+1} to zip")
+            # Create ZIP file
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for i, img in enumerate(images):
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format="JPEG", quality=90)  # Increased quality
+                    img_buffer.seek(0)
+                    img_data = img_buffer.read()
+                    print(f"Adding page {i+1} to zip (size: {len(img_data) / 1024:.1f}KB)")
+                    zip_file.writestr(f"page_{i+1}.jpg", img_data)
 
-        zip_buffer.seek(0)
-        print("Sending zip file response...")
-        return send_file(
-            zip_buffer,
-            as_attachment=True,
-            download_name="converted_images.zip",
-            mimetype="application/zip"
-        )
+            zip_buffer.seek(0)
+            zip_size = len(zip_buffer.getvalue())
+            print(f"Created zip file (size: {zip_size / 1024:.1f}KB)")
+
+            if zip_size == 0:
+                print("Error: Generated zip file is empty!")
+                return jsonify({
+                    "error": "Conversion failed",
+                    "details": "Generated zip file is empty"
+                }), 500
+
+            return send_file(
+                zip_buffer,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(pdf_file.filename)[0]}_converted.zip",
+                mimetype="application/zip"
+            )
     except Exception as e:
         print("Conversion error:", str(e))
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "error": "Conversion failed",
             "details": str(e)
