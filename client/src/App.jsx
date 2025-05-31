@@ -8,25 +8,23 @@ import JpgToPdf from './pages/JpgToPdf';
 import QA from './pages/QA';
 import Contact from './pages/Contact';
 
-function App() {
-  return (
-    <Router>
-      <div className="min-h-screen bg-[#1f1f1f] flex flex-col">
-        <Navigation />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/pdf-to-jpg" element={<PdfToJpg />} />
-            <Route path="/jpg-to-pdf" element={<JpgToPdf />} />
-            <Route path="/qa" element={<QA />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
-  );
-}
+const App = () => (
+  <Router>
+    <div className="min-h-screen bg-[#1f1f1f] flex flex-col">
+      <Navigation />
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/pdf-to-jpg" element={<PdfToJpg />} />
+          <Route path="/jpg-to-pdf" element={<JpgToPdf />} />
+          <Route path="/qa" element={<QA />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  </Router>
+);
 
 export default App;
