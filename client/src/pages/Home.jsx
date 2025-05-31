@@ -2,11 +2,11 @@ import AdUnit from '../components/AdUnit';
 
 export default function Home() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-3">
       <AdUnit slot="1234567890" /> {/* Replace with your actual ad slot ID */}
       
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold text-white mb-4">Convert Your Files for Free</h2>
+      <section className="mb-6">
+        <h2 className="text-2xl font-semibold text-white mb-3">Convert Your Files for Free</h2>
         <p className="text-gray-300 mb-4">
           Welcome to FreePDF2JPG, your go-to solution for quick and easy file conversions. Our tool helps you convert PDF files to high-quality JPG images and combine multiple JPG images into a single PDF document.
         </p>

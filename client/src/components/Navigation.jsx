@@ -27,9 +27,9 @@ export default function Navigation() {
   return (
     <header className="bg-[#1f1f1f]">
       {/* Title Section */}
-      <div className="text-center py-6">
+      <div className="text-center py-3">
         <h1 className="text-3xl font-bold text-white">Free PDF to JPG & JPG to PDF Converter</h1>
-        <p className="text-gray-300 mt-2">Convert your files easily and securely</p>
+        <p className="text-gray-300 mt-1">Convert your files easily and securely</p>
       </div>
 
       {/* Navigation Bar */}
