@@ -9,6 +9,8 @@ import tempfile
 import magic
 import logging.handlers
 import sys
+import glob
+import shutil
 
 # Configure logging
 log_format = '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s'
@@ -100,128 +102,124 @@ def index():
 
 @app.route("/api/pdf-to-jpg", methods=["POST"])
 def convert_pdf_to_jpg():
-    logger.info("Received PDF to JPG request")
+    logger.info("=== Starting PDF to JPG conversion ===")
     
     if 'file' not in request.files:
-        logger.error("No file in request")
-        return jsonify({
-            "error": "No PDF file uploaded",
-            "details": "Please select a PDF file to convert"
-        }), 400
+        logger.error("No file part in the request")
+        return jsonify({"error": "No file part"}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        logger.error("No selected file")
+        return jsonify({"error": "No selected file"}), 400
 
-    pdf_file = request.files['file']
-    logger.info(f"Received file: {pdf_file.filename}")
-    
-    if not pdf_file.filename.lower().endswith(".pdf"):
-        logger.error(f"Invalid file extension: {pdf_file.filename}")
-        return jsonify({
-            "error": "Invalid file type",
-            "details": "Only PDF files are accepted"
-        }), 400
+    if not file.filename.lower().endswith('.pdf'):
+        logger.error(f"Invalid file type: {file.filename}")
+        return jsonify({"error": "Only PDF files are allowed"}), 400
 
     try:
-        # Create a temporary directory for processing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            logger.info(f"Created temp directory: {temp_dir}")
-            
-            # Save uploaded PDF to temporary file
-            temp_pdf_path = os.path.join(temp_dir, "input.pdf")
-            pdf_file.save(temp_pdf_path)
-            
-            file_size = os.path.getsize(temp_pdf_path)
-            logger.info(f"Saved PDF to temporary file: {temp_pdf_path} (size: {file_size / 1024:.1f}KB)")
-            
-            if file_size > MAX_PDF_SIZE:
-                logger.error(f"File too large: {file_size / (1024 * 1024):.1f}MB")
-                return jsonify({
-                    "error": "File too large",
-                    "details": f"Maximum file size is 15MB. Your file is {file_size / (1024 * 1024):.1f}MB"
-                }), 413
+        # Create a unique temporary directory
+        temp_dir = tempfile.mkdtemp(prefix='pdf2jpg_')
+        logger.info(f"Created temporary directory: {temp_dir}")
 
-            if file_size == 0:
-                logger.error("Empty file")
-                return jsonify({
-                    "error": "Empty file",
-                    "details": "The uploaded PDF file is empty"
-                }), 400
+        # Save the uploaded PDF
+        pdf_path = os.path.join(temp_dir, 'input.pdf')
+        file.save(pdf_path)
+        pdf_size = os.path.getsize(pdf_path)
+        logger.info(f"Saved PDF file: {pdf_path} (size: {pdf_size} bytes)")
 
-            # Validate PDF content
-            with open(temp_pdf_path, 'rb') as f:
-                if not is_valid_pdf(f.read()):
-                    logger.error("Invalid PDF content")
-                    return jsonify({
-                        "error": "Invalid PDF file",
-                        "details": "The uploaded file is not a valid PDF"
-                    }), 400
+        if pdf_size == 0:
+            logger.error("Uploaded PDF is empty")
+            return jsonify({"error": "Empty PDF file"}), 400
 
-            # Create output directory for images
-            images_dir = os.path.join(temp_dir, "images")
-            os.makedirs(images_dir, exist_ok=True)
-            
-            # Convert PDF to images
-            logger.info("Starting PDF conversion...")
-            try:
-                images = convert_from_bytes(
-                    open(temp_pdf_path, 'rb').read(),
-                    dpi=200,
-                    fmt="jpeg",
-                    thread_count=1,
-                    use_pdftocairo=True,
-                    output_folder=images_dir,
-                    output_file="page"
-                )
-                logger.info(f"Successfully converted {len(images)} pages")
-            except Exception as e:
-                logger.error(f"PDF conversion failed: {str(e)}", exc_info=True)
-                raise Exception(f"PDF conversion failed: {str(e)}")
+        # Create output directory for images
+        images_dir = os.path.join(temp_dir, 'images')
+        os.makedirs(images_dir)
+        logger.info(f"Created images directory: {images_dir}")
 
-            if not images:
-                logger.error("No images were generated from the PDF")
-                raise Exception("No images were generated from the PDF")
-
-            # Create ZIP file path
-            zip_path = os.path.join(temp_dir, "converted.zip")
-            
-            # Create ZIP file from the images directory
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                for i, img_path in enumerate(sorted(os.listdir(images_dir)), 1):
-                    if img_path.endswith('.jpg'):
-                        full_path = os.path.join(images_dir, img_path)
-                        file_size = os.path.getsize(full_path)
-                        
-                        if file_size == 0:
-                            logger.error(f"Generated image {img_path} is empty")
-                            continue
-                            
-                        logger.info(f"Adding {img_path} to zip (size: {file_size / 1024:.1f}KB)")
-                        zip_file.write(full_path, f"page_{i}.jpg")
-
-            # Check if ZIP file was created successfully
-            if not os.path.exists(zip_path):
-                logger.error("ZIP file was not created")
-                raise Exception("Failed to create ZIP file")
-
-            zip_size = os.path.getsize(zip_path)
-            logger.info(f"Created zip file (size: {zip_size / 1024:.1f}KB)")
-
-            if zip_size == 0:
-                logger.error("Generated ZIP file is empty")
-                raise Exception("Generated ZIP file is empty")
-
-            logger.info("Sending response...")
-            return send_file(
-                zip_path,
-                as_attachment=True,
-                download_name=f"{os.path.splitext(pdf_file.filename)[0]}_converted.zip",
-                mimetype="application/zip"
+        # Convert PDF to images
+        logger.info("Starting PDF to image conversion...")
+        try:
+            # First attempt with pdf2image
+            images = convert_from_bytes(
+                open(pdf_path, 'rb').read(),
+                dpi=200,
+                fmt='jpeg',
+                output_folder=images_dir,
+                output_file='page',
+                use_pdftocairo=True,
+                paths_only=True  # This will return paths instead of PIL images
             )
+            logger.info(f"Successfully converted PDF to {len(images)} images")
+        except Exception as e:
+            logger.error(f"Failed to convert PDF using pdf2image: {str(e)}")
+            # Fallback to pdftocairo directly
+            try:
+                import subprocess
+                output_pattern = os.path.join(images_dir, 'page-%d.jpg')
+                subprocess.run(['pdftocairo', '-jpeg', '-r', '200', pdf_path, os.path.join(images_dir, 'page')], check=True)
+                images = sorted(glob.glob(os.path.join(images_dir, '*.jpg')))
+                logger.info(f"Successfully converted PDF using pdftocairo directly: {len(images)} images")
+            except Exception as e2:
+                logger.error(f"Failed to convert PDF using pdftocairo directly: {str(e2)}")
+                return jsonify({"error": "Failed to convert PDF"}), 500
+
+        # Verify images were created
+        image_files = sorted(glob.glob(os.path.join(images_dir, '*.jpg')))
+        if not image_files:
+            logger.error("No images were generated")
+            return jsonify({"error": "No images were generated from PDF"}), 500
+
+        # Log image files and their sizes
+        for img_path in image_files:
+            size = os.path.getsize(img_path)
+            logger.info(f"Generated image: {img_path} (size: {size} bytes)")
+            if size == 0:
+                logger.error(f"Generated empty image: {img_path}")
+                return jsonify({"error": "Generated empty image file"}), 500
+
+        # Create ZIP file
+        zip_path = os.path.join(temp_dir, 'converted.zip')
+        logger.info(f"Creating ZIP file: {zip_path}")
+        
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for i, img_path in enumerate(image_files, 1):
+                arcname = f'page_{i}.jpg'
+                logger.info(f"Adding to ZIP: {img_path} as {arcname}")
+                zipf.write(img_path, arcname)
+                
+        # Verify ZIP file
+        zip_size = os.path.getsize(zip_path)
+        logger.info(f"Created ZIP file: {zip_path} (size: {zip_size} bytes)")
+        
+        if zip_size == 0:
+            logger.error("Created ZIP file is empty")
+            return jsonify({"error": "Failed to create ZIP file"}), 500
+
+        # Read ZIP file into memory
+        with open(zip_path, 'rb') as f:
+            zip_data = f.read()
+            
+        # Clean up
+        shutil.rmtree(temp_dir)
+        logger.info("Cleaned up temporary directory")
+
+        # Send response
+        logger.info(f"Sending ZIP file (size: {len(zip_data)} bytes)")
+        return send_file(
+            io.BytesIO(zip_data),
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f"{os.path.splitext(file.filename)[0]}_converted.zip"
+        )
 
     except Exception as e:
-        logger.error(f"Conversion error: {str(e)}", exc_info=True)
-        return jsonify({
-            "error": "Conversion failed",
-            "details": str(e)
-        }), 500
+        logger.error(f"Conversion failed: {str(e)}", exc_info=True)
+        # Clean up on error
+        if 'temp_dir' in locals():
+            shutil.rmtree(temp_dir)
+            logger.info("Cleaned up temporary directory after error")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/jpg-to-pdf", methods=["POST"])
 def convert_jpg_to_pdf():
