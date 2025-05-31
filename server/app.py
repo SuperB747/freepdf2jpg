@@ -1,17 +1,16 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from pdf2image import convert_from_bytes
 from PIL import Image
 import io
 import zipfile
 import os
 import tempfile
 import magic
-import logging.handlers
+import logging
 import sys
-import glob
-import shutil
 import datetime
+from PyPDF2 import PdfReader
+import fitz  # PyMuPDF
 
 # Configure logging
 logging.basicConfig(
@@ -21,10 +20,6 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
-
-# Set third-party loggers to WARNING to reduce noise
-logging.getLogger('PIL').setLevel(logging.WARNING)
-logging.getLogger('pdf2image').setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -47,41 +42,22 @@ MAX_PDF_SIZE = 15 * 1024 * 1024  # 15MB for PDF files
 MAX_TOTAL_JPG_SIZE = 15 * 1024 * 1024  # 15MB for combined JPG files
 app.config['MAX_CONTENT_LENGTH'] = MAX_TOTAL_JPG_SIZE
 
-# Configure Flask app
-app.config['UPLOAD_FOLDER'] = '/tmp'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+def convert_pdf_to_images(pdf_path, output_dir):
+    """Convert PDF to images using PyMuPDF (fitz)"""
+    pdf_document = fitz.open(pdf_path)
+    images = []
+    
+    for page_number in range(pdf_document.page_count):
+        page = pdf_document[page_number]
+        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom for better quality
+        image_path = os.path.join(output_dir, f'page_{page_number + 1}.jpg')
+        pix.save(image_path)
+        images.append(image_path)
+        logger.info(f"Converted page {page_number + 1} to image")
+    
+    pdf_document.close()
+    return images
 
-# Error handlers
-@app.errorhandler(413)
-def request_entity_too_large(error):
-    logger.error("File too large error")
-    return jsonify({
-        "error": "File too large",
-        "details": "The file exceeds the maximum allowed size of 15MB"
-    }), 413
-
-@app.errorhandler(500)
-def internal_server_error(error):
-    logger.error(f"Internal server error: {str(error)}", exc_info=True)
-    return jsonify({
-        "error": "Internal server error",
-        "details": "An unexpected error occurred. Please try again later."
-    }), 500
-
-def is_valid_pdf(file_content):
-    """Check if the file content is actually a PDF."""
-    mime = magic.Magic(mime=True)
-    file_type = mime.from_buffer(file_content)
-    return file_type == 'application/pdf'
-
-def is_valid_jpeg(file_content):
-    """Check if the file content is actually a JPEG."""
-    mime = magic.Magic(mime=True)
-    file_type = mime.from_buffer(file_content)
-    return file_type.startswith('image/jpeg')
-
-# Health check endpoint
 @app.route("/health", methods=["GET", "HEAD"])
 def health_check():
     logger.info("Health check request received")
@@ -143,32 +119,13 @@ def convert_pdf_to_jpg():
         # Convert PDF to images
         logger.info("Starting PDF to image conversion...")
         try:
-            # First attempt with pdf2image
-            images = convert_from_bytes(
-                open(pdf_path, 'rb').read(),
-                dpi=200,
-                fmt='jpeg',
-                output_folder=images_dir,
-                output_file='page',
-                use_pdftocairo=True,
-                paths_only=True  # This will return paths instead of PIL images
-            )
-            logger.info(f"Successfully converted PDF to {len(images)} images")
+            image_files = convert_pdf_to_images(pdf_path, images_dir)
+            logger.info(f"Successfully converted PDF to {len(image_files)} images")
         except Exception as e:
-            logger.error(f"Failed to convert PDF using pdf2image: {str(e)}")
-            # Fallback to pdftocairo directly
-            try:
-                import subprocess
-                output_pattern = os.path.join(images_dir, 'page-%d.jpg')
-                subprocess.run(['pdftocairo', '-jpeg', '-r', '200', pdf_path, os.path.join(images_dir, 'page')], check=True)
-                images = sorted(glob.glob(os.path.join(images_dir, '*.jpg')))
-                logger.info(f"Successfully converted PDF using pdftocairo directly: {len(images)} images")
-            except Exception as e2:
-                logger.error(f"Failed to convert PDF using pdftocairo directly: {str(e2)}")
-                return jsonify({"error": "Failed to convert PDF"}), 500
+            logger.error(f"Failed to convert PDF: {str(e)}")
+            return jsonify({"error": "Failed to convert PDF"}), 500
 
         # Verify images were created
-        image_files = sorted(glob.glob(os.path.join(images_dir, '*.jpg')))
         if not image_files:
             logger.error("No images were generated")
             return jsonify({"error": "No images were generated from PDF"}), 500
@@ -204,6 +161,7 @@ def convert_pdf_to_jpg():
             zip_data = f.read()
             
         # Clean up
+        import shutil
         shutil.rmtree(temp_dir)
         logger.info("Cleaned up temporary directory")
 
