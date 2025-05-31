@@ -63,27 +63,98 @@ def convert_pdf_to_images(pdf_path, output_dir):
     return images
 
 def create_pdf_from_images(image_paths, output_path):
-    """Create PDF from multiple images"""
+    """Create PDF from multiple images with letter size pages"""
     if not image_paths:
         raise ValueError("No images provided")
-        
-    # Use first image to get target size
+    
+    # Letter size in pixels at 300 DPI
+    LETTER_WIDTH = int(8.5 * 300)  # 8.5 inches * 300 DPI = 2550 pixels
+    LETTER_HEIGHT = int(11 * 300)  # 11 inches * 300 DPI = 3300 pixels
+    
+    # Create PDF with the first image
     with Image.open(image_paths[0]) as first_img:
-        target_size = first_img.size
+        # Convert to RGB if needed
+        if first_img.mode in ('RGBA', 'LA', 'P'):
+            rgb_img = Image.new('RGB', first_img.size, (255, 255, 255))
+            if first_img.mode == 'P':
+                first_img = first_img.convert('RGBA')
+            rgb_img.paste(first_img, mask=first_img.split()[-1] if first_img.mode in ('RGBA', 'LA') else None)
+            first_img = rgb_img
+
+        # Calculate resize dimensions while maintaining aspect ratio
+        img_ratio = first_img.width / first_img.height
+        letter_ratio = LETTER_WIDTH / LETTER_HEIGHT
+
+        if img_ratio > letter_ratio:
+            # Image is wider than letter size
+            new_width = LETTER_WIDTH
+            new_height = int(LETTER_WIDTH / img_ratio)
+        else:
+            # Image is taller than letter size
+            new_height = LETTER_HEIGHT
+            new_width = int(LETTER_HEIGHT * img_ratio)
+
+        # Resize first image
+        resized_img = first_img.resize((new_width, new_height), Image.Resampling.LANCZOS)
         
-        # Create PDF
-        first_img.save(
+        # Create white background of letter size
+        letter_page = Image.new('RGB', (LETTER_WIDTH, LETTER_HEIGHT), 'white')
+        
+        # Center the image on the page
+        x = (LETTER_WIDTH - new_width) // 2
+        y = (LETTER_HEIGHT - new_height) // 2
+        letter_page.paste(resized_img, (x, y))
+        
+        # Save first page and prepare to append others
+        letter_page.save(
             output_path,
             "PDF",
             resolution=300.0,
             save_all=True,
             append_images=[
-                Image.open(img_path).resize(target_size)
+                process_image_for_pdf(img_path, LETTER_WIDTH, LETTER_HEIGHT)
                 for img_path in image_paths[1:]
             ]
         )
     
     return output_path
+
+def process_image_for_pdf(img_path, target_width, target_height):
+    """Process a single image for PDF inclusion"""
+    with Image.open(img_path) as img:
+        # Convert to RGB if needed
+        if img.mode in ('RGBA', 'LA', 'P'):
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+            img = rgb_img
+
+        # Calculate resize dimensions
+        img_ratio = img.width / img.height
+        target_ratio = target_width / target_height
+
+        if img_ratio > target_ratio:
+            # Image is wider than target
+            new_width = target_width
+            new_height = int(target_width / img_ratio)
+        else:
+            # Image is taller than target
+            new_height = target_height
+            new_width = int(target_height * img_ratio)
+
+        # Resize image
+        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Create white background
+        letter_page = Image.new('RGB', (target_width, target_height), 'white')
+        
+        # Center the image
+        x = (target_width - new_width) // 2
+        y = (target_height - new_height) // 2
+        letter_page.paste(resized_img, (x, y))
+        
+        return letter_page
 
 @app.route("/health", methods=["GET", "HEAD"])
 def health_check():
