@@ -150,10 +150,15 @@ export default function PdfToJpg() {
       <div className="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
         <h2 className="text-xl font-semibold text-white mb-4">PDF to JPG Converter</h2>
         <p className="text-gray-300 mb-6">
-          Convert your PDF files to high-quality JPG images. Maximum file size: 15MB.
+          Convert your PDF files to high-quality JPG images. Each page of your PDF will be converted to a separate JPG image.
+          Maximum file size: 15MB.
         </p>
 
-        <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center mb-6">
+        <div
+          className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center mb-6"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
           <input
             type="file"
             accept="application/pdf"
@@ -179,7 +184,7 @@ export default function PdfToJpg() {
             <div className="mt-4">
               <p className="text-gray-300">Selected file: {pdfFile.name}</p>
               <button
-                onClick={() => setPdfFile(null)}
+                onClick={handleReset}
                 className="text-red-400 hover:text-red-300 mt-2"
               >
                 Remove file
@@ -225,7 +230,7 @@ export default function PdfToJpg() {
           </button>
           {pdfFile && (
             <button
-              onClick={() => setPdfFile(null)}
+              onClick={handleReset}
               disabled={isConverting}
               className="px-6 py-2 bg-gray-600 text-white rounded disabled:opacity-50 hover:bg-gray-700 transition-colors"
             >
@@ -243,33 +248,32 @@ export default function PdfToJpg() {
           <div>
             <h3 className="text-lg font-medium text-white mb-3">Step-by-Step Guide</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
-              <li>Click the "Select PDF File" button or drag and drop your PDF file (max 15MB)</li>
-              <li>Your PDF file will appear in the upload area once selected</li>
+              <li>Click "Select PDF File" or drag and drop your PDF into the upload area</li>
+              <li>Your selected PDF will appear below the upload area</li>
               <li>Click the "Convert to JPG" button to start the conversion</li>
-              <li>Wait for the conversion process to complete</li>
-              <li>Your converted images will be downloaded automatically as a ZIP file</li>
+              <li>Your converted images will download as a ZIP file when ready</li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-medium text-white mb-3">Features</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
-              <li>Convert PDF documents to high-quality JPG images</li>
-              <li>Maintain original image quality and resolution</li>
-              <li>Process multiple pages at once</li>
+              <li>Convert each PDF page to a high-quality JPG image</li>
+              <li>Maintain original document quality</li>
+              <li>Download all images in a convenient ZIP file</li>
               <li>Secure and private conversion</li>
-              <li>Download all images in a convenient ZIP format</li>
+              <li>Support for multi-page PDF documents</li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-medium text-white mb-3">Tips</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
-              <li>For best results, ensure your PDF file is less than 50MB</li>
-              <li>Each page of your PDF will be converted to a separate JPG image</li>
-              <li>The conversion process time depends on the file size and number of pages</li>
-              <li>You can convert a new PDF file after the current conversion is complete</li>
-              <li>Use the Reset button to clear the current file and start over</li>
+              <li>For best results, use a high-quality PDF file</li>
+              <li>Each page will be converted to a separate JPG image</li>
+              <li>The conversion time depends on the number of pages in your PDF</li>
+              <li>Images will be named according to their page numbers</li>
+              <li>Use the Reset button to remove the selected file and start over</li>
             </ul>
           </div>
         </div>
