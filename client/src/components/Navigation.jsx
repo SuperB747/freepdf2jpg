@@ -52,10 +52,7 @@ export default function Navigation() {
                 About
               </Link>
             </li>
-            <li 
-              className="relative" 
-              ref={toolsRef}
-            >
+            <li className="relative" ref={toolsRef}>
               <button
                 type="button"
                 className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${
@@ -67,36 +64,30 @@ export default function Navigation() {
                 <span className={`ml-1 transition-transform duration-200 inline-block ${isToolsOpen ? 'rotate-180' : ''}`}>▼</span>
               </button>
               {isToolsOpen && (
-                <ul
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute left-0 top-full w-48 bg-gray-800 shadow-lg py-2 z-[9999] border border-yellow-400"
+                <div
+                  className="absolute left-0 top-full w-48 bg-gray-800 shadow-lg py-2 z-50 border border-gray-700 rounded-md"
                   style={{
                     position: 'absolute',
                     top: '100%',
-                    left: 0,
-                    visibility: 'visible',
-                    display: 'block',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                   }}
                 >
-                  <li>
-                    <Link
-                      to="/pdf-to-jpg"
-                      className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
-                      onClick={() => setIsToolsOpen(false)}
-                    >
-                      PDF to JPG
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/jpg-to-pdf"
-                      className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
-                      onClick={() => setIsToolsOpen(false)}
-                    >
-                      JPG to PDF
-                    </Link>
-                  </li>
-                </ul>
+                  <Link
+                    to="/pdf-to-jpg"
+                    className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
+                    onClick={() => setIsToolsOpen(false)}
+                  >
+                    PDF to JPG
+                  </Link>
+                  <Link
+                    to="/jpg-to-pdf"
+                    className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
+                    onClick={() => setIsToolsOpen(false)}
+                  >
+                    JPG to PDF
+                  </Link>
+                </div>
               )}
             </li>
             <li>
