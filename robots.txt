@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /$
+Allow: /about$
+Allow: /contact$
+Allow: /pdf-to-jpg$
+Allow: /jpg-to-pdf$
+Allow: /qa$
+Allow: /privacy-policy$
+Allow: /terms-of-service$
+Allow: /sitemap.xml$
+
+# Block language specific paths
+Disallow: /fr/
+Disallow: /es/
+Disallow: /de/
+Disallow: /it/
+Disallow: /pt/
+Disallow: /ru/
+Disallow: /zh/
+Disallow: /ja/
+Disallow: /ko/
+
+# Block other unnecessary paths
+Disallow: /api/
+Disallow: /assets/
+Disallow: /*.js$
+Disallow: /*.css$
+
+# Crawl delay
+Crawl-delay: 10
+
+# Sitemap
+Sitemap: https://freepdf2jpg.ca/sitemap.xml 

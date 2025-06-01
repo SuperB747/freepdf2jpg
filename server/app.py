@@ -26,19 +26,19 @@ logger = logging.getLogger(__name__)
 MAX_FILE_SIZE = 15 * 1024 * 1024  # 15MB limit for both PDF and JPG files
 
 def create_app():
-    app = Flask(__name__)
+app = Flask(__name__)
     
     # Configure CORS
     allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
     logger.info(f"Allowed origins: {allowed_origins}")
-    CORS(app, resources={
+CORS(app, resources={
         r"/*": {
             "origins": allowed_origins,
-            "methods": ["GET", "POST", "OPTIONS"],
-            "allow_headers": ["Content-Type"]
-        }
-    })
-    
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
+
     # Configure upload size limit
     app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
     
@@ -184,7 +184,7 @@ def convert_pdf_to_jpg():
     if 'file' not in request.files:
         logger.error("No file in request")
         return jsonify({"error": "No file part"}), 400
-        
+
     file = request.files['file']
     if file.filename == '':
         logger.error("No selected file")
@@ -338,12 +338,12 @@ def convert_jpg_to_pdf():
 
             # Send PDF
             logger.info("Sending PDF response...")
-            return send_file(
+        return send_file(
                 pdf_path,
                 mimetype='application/pdf',
-                as_attachment=True,
+            as_attachment=True,
                 download_name='combined.pdf'
-            )
+        )
 
         except Exception as e:
             logger.error(f"Failed to create PDF: {str(e)}")
