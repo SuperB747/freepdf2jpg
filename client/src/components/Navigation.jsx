@@ -24,6 +24,10 @@ export default function Navigation() {
     };
   }, []);
 
+  const toggleDropdown = () => {
+    setIsToolsOpen(!isToolsOpen);
+  };
+
   return (
     <header className="bg-[#1f1f1f]">
       {/* Title Section */}
@@ -52,44 +56,46 @@ export default function Navigation() {
                 About
               </Link>
             </li>
-            <li className="relative group" ref={toolsRef}>
+            <li className="relative" ref={toolsRef}>
               <button
                 type="button"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center hover:bg-blue-600 transition-colors ${
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center hover:bg-blue-600 transition-colors ${
                   isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
                 }`}
-                onClick={() => setIsToolsOpen(!isToolsOpen)}
+                onClick={toggleDropdown}
               >
-                Tools
+                <span>Tools</span>
                 <span 
                   className={`ml-1 transition-transform duration-200 inline-block ${isToolsOpen ? 'rotate-180' : ''}`}
                 >
                   ▼
                 </span>
               </button>
-              {isToolsOpen && (
-                <div
-                  className="absolute left-0 mt-0 w-48 bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700"
-                  style={{
-                    zIndex: 50,
-                  }}
+              <div
+                className={`absolute left-0 w-48 bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700 ${
+                  isToolsOpen ? 'block' : 'hidden'
+                }`}
+                style={{
+                  top: '100%',
+                  zIndex: 9999,
+                  marginTop: '1px',
+                }}
+              >
+                <Link
+                  to="/pdf-to-jpg"
+                  className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
+                  onClick={() => setIsToolsOpen(false)}
                 >
-                  <Link
-                    to="/pdf-to-jpg"
-                    className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
-                    onClick={() => setIsToolsOpen(false)}
-                  >
-                    PDF to JPG
-                  </Link>
-                  <Link
-                    to="/jpg-to-pdf"
-                    className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
-                    onClick={() => setIsToolsOpen(false)}
-                  >
-                    JPG to PDF
-                  </Link>
-                </div>
-              )}
+                  PDF to JPG
+                </Link>
+                <Link
+                  to="/jpg-to-pdf"
+                  className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
+                  onClick={() => setIsToolsOpen(false)}
+                >
+                  JPG to PDF
+                </Link>
+              </div>
             </li>
             <li>
               <Link
