@@ -33,7 +33,7 @@ export default function Navigation() {
       </div>
 
       {/* Navigation Bar */}
-      <nav className="bg-gray-800 mb-1 overflow-x-auto">
+      <nav className="bg-gray-800 mb-1 overflow-x-auto relative">
         <div className="max-w-4xl mx-auto">
           <ul className="flex justify-center items-center min-w-max">
             <li>
@@ -69,7 +69,12 @@ export default function Navigation() {
               </button>
               {isToolsOpen && (
                 <ul
-                  className="absolute left-0 w-48 bg-gray-800 shadow-lg py-2 z-50"
+                  className="absolute left-0 w-48 bg-gray-800 shadow-lg py-2 z-[100]"
+                  style={{
+                    top: '100%',
+                    minWidth: '160px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
                 >
                   <li>
                     <Link
