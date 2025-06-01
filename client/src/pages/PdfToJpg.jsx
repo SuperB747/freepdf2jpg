@@ -23,6 +23,7 @@ export default function PdfToJpg() {
     setIsUploaded(false); 
     setShowSuccess(false);
     setConversionMessage("");
+    setUploadProgress(0);
   };
 
   const handleDrop = (e) => {
@@ -38,6 +39,7 @@ export default function PdfToJpg() {
       setIsUploaded(false);
       setShowSuccess(false);
       setConversionMessage("");
+      setUploadProgress(0);
     }
   };
 
@@ -62,40 +64,43 @@ export default function PdfToJpg() {
     }
 
     setIsConverting(true);
-    setConversionMessage("Starting conversion...");
-    setUploadProgress(0);
     setIsUploaded(false);
+    setUploadProgress(0);
     setShowSuccess(false);
+    setConversionMessage("Uploading PDF...");
 
     const formData = new FormData();
     formData.append("file", pdfFile);
 
     try {
-      const response = await fetch(`${API_URL}/pdf-to-jpg`, {
-        method: "POST",
-        body: formData,
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percentCompleted);
-          setConversionMessage(`Uploading: ${percentCompleted}%`);
-        },
-      });
+      const xhr = new XMLHttpRequest();
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "An unexpected error occurred during conversion." }));
-        let errorMessage = `HTTP error ${response.status}: ${response.statusText}`;
-        if (errorData && errorData.error) {
-          errorMessage = errorData.error;
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percentComplete);
+          if (percentComplete === 100) {
+            setIsUploaded(true);
+            setConversionMessage("Converting PDF to JPG images...");
+          }
         }
-        throw new Error(errorMessage);
-      }
-      
-      setIsUploaded(true);
-      setConversionMessage("Processing... Please wait.");
+      };
 
-      const blob = await response.blob();
+      const response = await new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.response);
+          } else {
+            reject(new Error(`HTTP error ${xhr.status}: ${xhr.statusText}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error occurred'));
+        xhr.responseType = 'blob';
+        xhr.open('POST', `${API_URL}/pdf-to-jpg`);
+        xhr.send(formData);
+      });
+
+      const blob = response;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -175,25 +180,30 @@ export default function PdfToJpg() {
             )}
           </div>
 
-          {uploadProgress > 0 && !isUploaded && (
-            <div className="mb-4">
-              <div className="h-2 bg-gray-700 rounded">
-                <div
-                  className="h-full bg-blue-500 rounded transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
+          {(isConverting || showSuccess) && (
+            <div className="mb-6">
+              <div className={`text-center text-sm mb-2 ${
+                showSuccess ? 'text-green-400' : 'text-gray-300'
+              }`}>
+                {conversionMessage}
               </div>
-              <p className="text-gray-300 text-sm mt-1 text-center">{conversionMessage}</p>
-            </div>
-          )}
-
-          {isUploaded && !showSuccess && (
-            <p className="text-center text-gray-300 mb-4">{conversionMessage}</p>
-          )}
-
-          {showSuccess && (
-            <div className="text-center mb-4 p-3 bg-green-600 text-white rounded">
-              {conversionMessage}
+              {isConverting && (
+                <>
+                  <div className="h-2 bg-gray-700 rounded overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ease-in-out bg-blue-500 ${
+                        isUploaded ? 'animate-pulse w-full' : ''
+                      }`}
+                      style={!isUploaded ? { width: `${uploadProgress}%` } : undefined}
+                    ></div>
+                  </div>
+                  {!isUploaded && (
+                    <div className="text-center text-sm text-gray-400 mt-1">
+                      {uploadProgress}%
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
