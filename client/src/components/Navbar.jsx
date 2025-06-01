@@ -22,32 +22,19 @@ export default function Navbar() {
           <Link to="/contact" className="text-gray-300 hover:text-white transition">Contact Us</Link>
           <div
             className="relative"
-            onMouseEnter={() => {
-              clearTimeout(window.dropdownTimer);
-              setIsDropdownOpen(true);
-            }}
-            onMouseLeave={() => {
-              window.dropdownTimer = setTimeout(() => setIsDropdownOpen(false), 100);
-            }}
+            onMouseEnter={() => setIsDropdownOpen(true)}
+            onMouseLeave={() => setIsDropdownOpen(false)}
           >
             <button
               type="button"
               className="text-gray-300 hover:text-white transition w-full text-left"
-              onClick={(e) => {
-                // Only toggle if it's not already open due to hover
-                if (!isDropdownOpen) {
-                  setIsDropdownOpen(true);
-                }
-              }}
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
             >
               Tools ▾
             </button>
             {isDropdownOpen && (
               <div
                 className="absolute bg-[#121212] border border-gray-700 shadow-lg top-full mt-2 rounded-md overflow-hidden z-50 min-w-[180px] transition-all duration-200"
-                onMouseLeave={() => {
-                  window.dropdownTimer = setTimeout(() => setIsDropdownOpen(false), 100);
-                }}
               >
                 <button
                   className="block px-5 py-3 text-left text-gray-300 hover:bg-gray-700 w-full whitespace-nowrap"

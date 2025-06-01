@@ -55,7 +55,6 @@ export default function Navigation() {
             <li 
               className="relative" 
               ref={toolsRef}
-              onMouseLeave={() => setIsToolsOpen(false)}
             >
               <button
                 type="button"
@@ -63,19 +62,14 @@ export default function Navigation() {
                   isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
                 }`}
                 onClick={() => setIsToolsOpen(!isToolsOpen)}
-                onMouseEnter={() => setIsToolsOpen(true)}
               >
                 Tools
                 <span className={`ml-1 transition-transform duration-200 inline-block ${isToolsOpen ? 'rotate-180' : ''}`}>▼</span>
               </button>
               {isToolsOpen && (
                 <ul
-                  className="absolute left-0 w-48 bg-gray-800 shadow-lg py-2 z-[100]"
-                  style={{
-                    top: '100%',
-                    minWidth: '160px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute left-0 top-full w-48 bg-gray-800 shadow-lg py-2 z-50"
                 >
                   <li>
                     <Link
