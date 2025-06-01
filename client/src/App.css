@@ -1,79 +1,42 @@
-/* Base layout */
-#root {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-  font-family: 'Lato', 'Segoe UI', sans-serif;
-  color: #f5f5f5;
-  background-color: #2c2c2c;
-}
+import React, { useState } from 'react';
 
-/* Header/Nav */
-header {
-  background-color: #000000;
-  border-bottom: 1px solid #444;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+const Navigation = () => {
+  const [toolsOpen, setToolsOpen] = useState(false);
 
-/* Logo placeholder */
-.logo {
-  height: 48px;
-  padding: 1rem;
-}
+  const toggleTools = () => {
+    setToolsOpen(!toolsOpen);
+  };
 
-/* Cards */
-.card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  padding: 2rem;
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
+  return (
+    <nav className="bg-gray-900 text-white p-4">
+      <ul className="flex space-x-4">
+        <li>
+          <button onClick={toggleTools} className="relative">
+            Tools
+          </button>
+          {toolsOpen && (
+            <ul
+              onClick={(e) => e.stopPropagation()}
+              className="absolute left-0 w-48 bg-gray-800 shadow-lg py-2 z-[9999] border border-green-500"
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                visibility: 'visible',
+                display: 'block',
+              }}
+            >
+              <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Tool 1</li>
+              <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Tool 2</li>
+              <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Tool 3</li>
+            </ul>
+          )}
+        </li>
+        <li>About</li>
+        <li>Contact</li>
+      </ul>
+    </nav>
+  );
+};
 
-/* Buttons */
-button {
-  background-color: #2563eb;
-  color: white;
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-button:hover {
-  background-color: #1d4ed8;
-}
-
-/* Utility */
-.text-center {
-  text-align: center;
-}
-.mt-4 {
-  margin-top: 1rem;
-}
-
-
-/* Drag-and-drop upload box */
-.drop-zone {
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 2rem;
-  text-align: center;
-  color: #ccc;
-  font-size: 1.1rem;
-  background-color: transparent;
-  transition: border-color 0.3s ease;
-}
-
-.drop-zone:hover {
-  border-color: #aaa;
-  color: #eee;
-}
-
-.drop-zone.dragover {
-  border-color: #2563eb;
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.05);
-}
+export default Navigation;
