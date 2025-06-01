@@ -1,23 +1,15 @@
 services:
   # Client configuration
-  - type: static
+  - type: web
     name: freepdf2jpg-client
+    env: node
     buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    headers:
-      - source: /**
-        headers:
-          - key: Cache-Control
-            value: no-cache
-    routes:
-      - type: rewrite
-        source: /**
-        destination: /200.html
-        status: 200
-    pullRequestPreviewsEnabled: true
+    startCommand: cd client && npm start
     envVars:
       - key: VITE_API_URL
         value: https://freepdf2jpg-server.onrender.com/api
+      - key: NODE_ENV
+        value: production
 
   # Server configuration
   - type: web
