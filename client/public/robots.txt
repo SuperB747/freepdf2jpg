@@ -3,20 +3,15 @@ User-agent: *
 Allow: /
 Allow: /pdf-to-jpg
 Allow: /jpg-to-pdf
-Allow: /about
-Allow: /privacy-policy
-Allow: /terms-of-service
 
-# Prevent access to certain directories
+# Prevent access to API and sensitive directories
 Disallow: /api/
-Disallow: /admin/
 Disallow: /temp/
-Disallow: /uploads/
 
 # Crawl-delay for all bots
 Crawl-delay: 1
 
-# Allow Google to crawl JavaScript
+# Allow Google to crawl JavaScript and CSS
 User-agent: Googlebot
 Allow: /
 Allow: /*.js$

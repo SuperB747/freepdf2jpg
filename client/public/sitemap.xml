@@ -45,6 +45,14 @@
     <priority>0.6</priority>
   </url>
 
+  <!-- Q&A Page -->
+  <url>
+    <loc>https://freepdf2jpg.ca/qa</loc>
+    <lastmod>2024-03-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://freepdf2jpg.ca/privacy-policy</loc>
@@ -59,14 +67,6 @@
     <lastmod>2024-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
-  </url>
-
-  <!-- QA Page -->
-  <url>
-    <loc>https://freepdf2jpg.ca/qa</loc>
-    <lastmod>2024-03-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
 
 </urlset> 
