@@ -69,7 +69,14 @@ export default function Navigation() {
               {isToolsOpen && (
                 <ul
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute left-0 top-full w-48 bg-gray-800 shadow-lg py-2 z-50"
+                  className="absolute left-0 top-full w-48 bg-gray-800 shadow-lg py-2 z-[9999] border border-yellow-400"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    visibility: 'visible',
+                    display: 'block',
+                  }}
                 >
                   <li>
                     <Link
