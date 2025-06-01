@@ -1,29 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function QA() {
   const [openQuestion, setOpenQuestion] = useState(null);
 
   const faqs = [
     {
-      question: "Is this service completely free?",
-      answer: "Yes, our service is 100% free to use. There are no hidden fees, subscriptions, or limitations on the number of conversions you can perform."
+      question: "How secure is this service?",
+      answer: "We take your privacy and security very seriously. All uploaded files are processed securely on our servers and are automatically deleted immediately after the conversion is complete. We do not store your files, and no backups are made."
     },
     {
-      question: "Are my files secure?",
-      answer: "Yes, your files are completely secure. All conversions are processed on our servers and files are automatically deleted after conversion. We never store or share your files, and all transfers are encrypted using HTTPS."
+      question: "Is this service really free?",
+      answer: "Yes, our PDF to JPG and JPG to PDF conversion tools are completely free to use. There are no hidden charges or subscription fees. We aim to provide a reliable service accessible to everyone."
     },
     {
-      question: "What's the maximum file size I can convert?",
-      answer: "For both PDF to JPG and JPG to PDF conversions, there is a 15MB file size limit. For JPG to PDF conversion, this means the total combined size of all JPG files cannot exceed 15MB. These limits help ensure fast and reliable conversion times for all users."
-    },
-    {
-      question: "How long does the conversion process take?",
-      answer: "Conversion time depends on the file size and number of pages/images. Most conversions complete within 10-30 seconds. Larger files may take longer. You can see the progress in real-time during conversion."
-    },
-    {
-      question: "What is the quality of the converted files?",
-      answer: "We maintain high quality in all conversions. For PDF to JPG, images are converted at 300 DPI by default, ensuring clear, readable results. For JPG to PDF, we preserve the original image quality in the PDF output."
+      question: "Are there any limitations on file size or number of conversions?",
+      answer: "For optimal performance and to ensure the service remains free for everyone, we currently have a file size limit of 15MB per file (and total for JPG to PDF). There is no hard limit on the number of conversions you can perform."
     },
     {
       question: "Can I convert multiple files at once?",
@@ -56,101 +49,85 @@ export default function QA() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <div className="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Frequently Asked Questions</h1>
-        <p className="text-gray-300 mb-6">
-          Find answers to common questions about our PDF to JPG and JPG to PDF conversion tools.
-        </p>
+    <>
+      <Helmet>
+        <title>Q&A | FreePDF2JPG</title>
+        <meta name="description" content="Find answers to frequently asked questions about FreePDF2JPG's PDF to JPG and JPG to PDF conversion tools." />
+        <link rel="canonical" href="https://freepdf2jpg.ca/qa" />
+      </Helmet>
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <header className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-white mb-3">Frequently Asked Questions</h1>
+          <p className="text-lg text-gray-300">
+            Find answers to common questions about our PDF to JPG and JPG to PDF conversion tools.
+          </p>
+        </header>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="border border-gray-700 rounded-lg overflow-hidden"
-            >
-              <button
-                className={`w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-700 transition-colors ${
-                  openQuestion === index ? 'bg-gray-700' : ''
-                }`}
-                onClick={() => toggleQuestion(index)}
+        <div className="bg-gray-800 rounded-lg shadow-xl p-8 mb-10">
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="border border-gray-700 rounded-lg overflow-hidden transition-all duration-300 hover:border-blue-500"
               >
-                <span className="text-white font-medium">{faq.question}</span>
-                <span className={`ml-4 transition-transform duration-200 ${
-                  openQuestion === index ? 'rotate-180' : ''
-                }`}>
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </span>
-              </button>
-              {openQuestion === index && (
-                <div className="px-6 py-4 bg-gray-900 border-t border-gray-700">
-                  <p className="text-gray-300">{faq.answer}</p>
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  className={`w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-700 focus:outline-none transition-colors ${
+                    openQuestion === index ? 'bg-gray-700' : ''
+                  }`}
+                  onClick={() => toggleQuestion(index)}
+                  aria-expanded={openQuestion === index}
+                  aria-controls={`faq-answer-${index}`}
+                >
+                  <span className="text-white font-medium text-lg">{faq.question}</span>
+                  <span className={`ml-4 transition-transform duration-300 transform ${
+                    openQuestion === index ? 'rotate-180' : ''
+                  }`}>
+                    <svg
+                      className="w-6 h-6 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </span>
+                </button>
+                {openQuestion === index && (
+                  <div id={`faq-answer-${index}`} className="px-6 py-5 bg-gray-900 border-t border-gray-700">
+                    <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Contact Section */}
-      <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h2 className="text-xl font-bold text-white mb-4">Still Have Questions?</h2>
-        <p className="text-gray-300 mb-4">
-          If you couldn't find the answer you were looking for, feel free to contact us. We're here to help!
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <section className="text-center bg-gray-800 rounded-lg shadow-xl p-8">
+          <h2 className="text-2xl font-bold text-white mb-4">Still Have Questions?</h2>
+          <p className="text-gray-300 mb-6">
+            If you couldn't find the answer you were looking for, feel free to contact us. We're here to help!
+          </p>
           <Link
             to="/contact"
-            className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md"
           >
             <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              className="w-5 h-5 mr-2 -ml-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
             </svg>
             Contact Support
           </Link>
-          <Link
-            to="/about"
-            className="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Learn More
-          </Link>
-        </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }

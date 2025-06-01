@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from 'react-helmet-async';
 import SEO from '../components/SEO';
 
 const API_URL = "https://freepdf2jpg-server.onrender.com/api";
@@ -19,6 +20,9 @@ export default function PdfToJpg() {
       return;
     }
     setPdfFile(file);
+    setIsUploaded(false); 
+    setShowSuccess(false);
+    setConversionMessage("");
   };
 
   const handleDrop = (e) => {
@@ -31,6 +35,9 @@ export default function PdfToJpg() {
         return;
       }
       setPdfFile(file);
+      setIsUploaded(false);
+      setShowSuccess(false);
+      setConversionMessage("");
     }
   };
 
@@ -42,112 +49,80 @@ export default function PdfToJpg() {
     setPdfFile(null);
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) fileInput.value = '';
+    setIsUploaded(false);
+    setShowSuccess(false);
+    setConversionMessage("");
+    setUploadProgress(0);
   };
 
   const handleConvert = async () => {
-    if (!pdfFile) return;
+    if (!pdfFile) {
+      alert("Please select a PDF file first.");
+      return;
+    }
+
     setIsConverting(true);
-    setIsUploaded(false);
+    setConversionMessage("Starting conversion...");
     setUploadProgress(0);
+    setIsUploaded(false);
     setShowSuccess(false);
-    setConversionMessage("Uploading PDF file...");
-    
+
     const formData = new FormData();
     formData.append("file", pdfFile);
 
     try {
-      const response = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(percentComplete);
-            if (percentComplete === 100) {
-              setIsUploaded(true);
-              setConversionMessage("Converting PDF to images...");
-            }
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            if (xhr.response.type === 'application/json') {
-              // If the response is JSON, it's probably an error
-              const reader = new FileReader();
-              reader.onload = () => {
-                const error = JSON.parse(reader.result);
-                reject(new Error(error.details || error.error || 'Conversion failed'));
-              };
-              reader.onerror = () => reject(new Error('Failed to read error response'));
-              reader.readAsText(xhr.response);
-            } else {
-              resolve(xhr.response);
-            }
-          } else {
-            if (xhr.responseType === 'blob') {
-              // Try to read error message from blob
-              const reader = new FileReader();
-              reader.onload = () => {
-                try {
-                  const error = JSON.parse(reader.result);
-                  reject(new Error(error.details || error.error || 'Upload failed'));
-                } catch {
-                  reject(new Error('Upload failed'));
-                }
-              };
-              reader.onerror = () => reject(new Error('Upload failed'));
-              reader.readAsText(xhr.response);
-            } else {
-              reject(new Error(xhr.responseText || 'Upload failed'));
-            }
-          }
-        };
-
-        xhr.onerror = () => {
-          reject(new Error('Upload failed'));
-        };
-
-        xhr.open('POST', `${API_URL}/pdf-to-jpg`);
-        xhr.responseType = 'blob';
-        xhr.send(formData);
+      const response = await fetch(`${API_URL}/pdf-to-jpg`, {
+        method: "POST",
+        body: formData,
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+          setConversionMessage(`Uploading: ${percentCompleted}%`);
+        },
       });
-
-      const blob = response;
-      console.log("Received blob:", blob.type, blob.size);
       
-      setConversionMessage("Conversion complete! Starting download...");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "An unexpected error occurred during conversion." }));
+        let errorMessage = `HTTP error ${response.status}: ${response.statusText}`;
+        if (errorData && errorData.error) {
+          errorMessage = errorData.error;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      setIsUploaded(true);
+      setConversionMessage("Processing... Please wait.");
+
+      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "converted.zip";
+      a.download = "converted_images.zip";
+      document.body.appendChild(a);
       a.click();
+      a.remove();
       window.URL.revokeObjectURL(url);
 
-      // Show success message
-      setIsConverting(false);
+      setConversionMessage("Conversion successful! Your download has started.");
       setShowSuccess(true);
-      setConversionMessage("Conversion completed successfully! Your download should begin automatically.");
-      
-      // Clear success state after 3 seconds
-      setTimeout(() => {
-        setShowSuccess(false);
-        setConversionMessage("");
-        setUploadProgress(0);
-        setIsUploaded(false);
-      }, 3000);
-    } catch (err) {
-      console.error("Conversion error:", err);
-      setConversionMessage("Error during conversion: " + err.message);
-      setUploadProgress(0);
-      setIsUploaded(false);
-      setShowSuccess(false);
+
+    } catch (error) {
+      console.error("Conversion error:", error);
+      setConversionMessage(`Conversion failed: ${error.message}`);
+    } finally {
       setIsConverting(false);
     }
   };
 
   return (
     <>
+      <Helmet>
+        <title>Convert PDF to JPG | FreePDF2JPG</title>
+        <meta name="description" content="Convert your PDF files to high-quality JPG images for free. Fast and easy PDF to JPG conversion." />
+        <link rel="canonical" href="https://freepdf2jpg.ca/pdf-to-jpg" />
+      </Helmet>
       <SEO 
         title="Convert PDF to JPG Online - Free PDF to Image Converter | FreePDF2JPG"
         description="Convert PDF files to high-quality JPG images online for free. Easy to use, no registration required. Maintain original quality with our PDF to JPG converter."
@@ -200,50 +175,49 @@ export default function PdfToJpg() {
             )}
           </div>
 
-          {(isConverting || showSuccess) && (
-            <div className="mb-6">
-              <div className={`text-center text-sm mb-2 ${
-                showSuccess ? 'text-green-400' : 'text-gray-300'
-              }`}>
-                {conversionMessage}
+          {uploadProgress > 0 && !isUploaded && (
+            <div className="mb-4">
+              <div className="h-2 bg-gray-700 rounded">
+                <div
+                  className="h-full bg-blue-500 rounded transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
               </div>
-              {isConverting && (
-                <>
-                  <div className="h-2 bg-gray-700 rounded overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-300 ease-in-out bg-blue-500 ${
-                        isUploaded ? 'animate-pulse w-full' : ''
-                      }`}
-                      style={!isUploaded ? { width: `${uploadProgress}%` } : undefined}
-                    ></div>
-                  </div>
-                  {!isUploaded && (
-                    <div className="text-center text-sm text-gray-400 mt-1">
-                      {uploadProgress}%
-                    </div>
-                  )}
-                </>
-              )}
+              <p className="text-gray-300 text-sm mt-1 text-center">{conversionMessage}</p>
             </div>
           )}
 
-          <div className="flex justify-center gap-4">
+          {isUploaded && !showSuccess && (
+            <p className="text-center text-gray-300 mb-4">{conversionMessage}</p>
+          )}
+
+          {showSuccess && (
+            <div className="text-center mb-4 p-3 bg-green-600 text-white rounded">
+              {conversionMessage}
+            </div>
+          )}
+
+          {!showSuccess && !isUploaded && conversionMessage && !isConverting && pdfFile && (
+            <div className="text-center mb-4 p-3 bg-red-600 text-white rounded">
+              {conversionMessage}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleConvert}
-              disabled={!pdfFile || isConverting}
-              className="px-6 py-2 bg-green-500 text-white rounded disabled:opacity-50 hover:bg-green-600 transition-colors"
+              disabled={isConverting || !pdfFile}
+              className="flex-1 bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isConverting ? "Converting..." : "Convert to JPG"}
             </button>
-            {pdfFile && (
-              <button
-                onClick={handleReset}
-                disabled={isConverting}
-                className="px-6 py-2 bg-gray-600 text-white rounded disabled:opacity-50 hover:bg-gray-700 transition-colors"
-              >
-                Reset
-              </button>
-            )}
+            <button
+              onClick={handleReset}
+              disabled={isConverting}
+              className="flex-1 bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Reset
+            </button>
           </div>
         </div>
 
