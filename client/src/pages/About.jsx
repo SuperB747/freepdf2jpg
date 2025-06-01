@@ -26,9 +26,34 @@ export default function About() {
 
         <section className="mb-12">
           <h2 className="text-3xl font-semibold text-white mb-6 text-center">Our Mission</h2>
-          <p className="text-lg text-gray-300 leading-relaxed text-center max-w-2xl mx-auto">
-            At FreePDF2JPG, our mission is to provide everyone with easy-to-use, reliable, and completely free file conversion tools. We believe that basic utilities like converting PDFs to JPGs or merging JPGs into PDFs should be accessible to all, without intrusive ads or hidden fees. We are committed to ensuring your privacy and data security throughout the process.
-          </p>
+          <div className="bg-gray-800 rounded-lg p-8 shadow-xl transform hover:scale-105 transition-transform duration-300">
+            <div className="flex items-start mb-6">
+              <span className="text-4xl mr-4">🎯</span>
+              <h3 className="text-2xl font-semibold text-purple-400">Empowering Digital Conversion</h3>
+            </div>
+            <div className="space-y-6">
+              <p className="text-lg text-gray-300 leading-relaxed">
+                At FreePDF2JPG, our mission is to provide everyone with easy-to-use, reliable, and completely free file conversion tools. We believe that basic utilities like converting PDFs to JPGs or merging JPGs into PDFs should be accessible to all, without intrusive ads or hidden fees.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <span className="text-2xl mb-2 block">🚀</span>
+                  <h4 className="text-white font-semibold mb-2">Simplicity</h4>
+                  <p className="text-gray-300 text-sm">Easy-to-use tools for everyone</p>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <span className="text-2xl mb-2 block">💎</span>
+                  <h4 className="text-white font-semibold mb-2">Quality</h4>
+                  <p className="text-gray-300 text-sm">High-quality conversion results</p>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-4 text-center">
+                  <span className="text-2xl mb-2 block">🔒</span>
+                  <h4 className="text-white font-semibold mb-2">Security</h4>
+                  <p className="text-gray-300 text-sm">Your privacy is our priority</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="mb-12">
