@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -7,7 +9,10 @@ export default function Home() {
           Welcome to FreePDF2JPG, your go-to solution for quick and easy file conversions. Our tool helps you convert PDF files to high-quality JPG images and combine multiple JPG images into a single PDF document.
         </p>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gray-800 p-6 rounded-lg">
+          <Link 
+            to="/pdf-to-jpg"
+            className="block bg-gray-800 p-6 rounded-lg transition-all duration-200 hover:bg-gray-700 hover:shadow-lg transform hover:-translate-y-1"
+          >
             <h3 className="text-xl font-semibold text-white mb-3">PDF to JPG</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
               <li>Convert PDF pages to high-quality JPG images</li>
@@ -15,8 +20,11 @@ export default function Home() {
               <li>Download all images in a convenient ZIP file</li>
               <li>Process multiple pages at once</li>
             </ul>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg">
+          </Link>
+          <Link 
+            to="/jpg-to-pdf"
+            className="block bg-gray-800 p-6 rounded-lg transition-all duration-200 hover:bg-gray-700 hover:shadow-lg transform hover:-translate-y-1"
+          >
             <h3 className="text-xl font-semibold text-white mb-3">JPG to PDF</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
               <li>Combine multiple JPG images into one PDF</li>
@@ -24,7 +32,7 @@ export default function Home() {
               <li>Preserve image quality</li>
               <li>Instant PDF download</li>
             </ul>
-          </div>
+          </Link>
         </div>
       </section>
 
