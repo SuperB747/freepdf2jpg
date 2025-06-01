@@ -24,6 +24,14 @@ export default function Navigation() {
     };
   }, []);
 
+  const handleMouseEnter = () => {
+    setIsToolsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsToolsOpen(false);
+  };
+
   const toggleDropdown = () => {
     setIsToolsOpen(!isToolsOpen);
   };
@@ -56,7 +64,13 @@ export default function Navigation() {
                 About
               </Link>
             </li>
-            <li className="relative" style={{ position: 'relative' }} ref={toolsRef}>
+            <li 
+              className="relative" 
+              style={{ position: 'relative' }} 
+              ref={toolsRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <button
                 type="button"
                 className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center gap-1 hover:bg-blue-600 transition-colors ${
@@ -73,9 +87,12 @@ export default function Navigation() {
                 </span>
               </button>
               <div
-                className={`dropdown-menu absolute left-0 min-w-[12rem] bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700`}
+                className={`dropdown-menu absolute left-0 min-w-[12rem] bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700 transition-all duration-200 ${
+                  isToolsOpen 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-[-8px] pointer-events-none'
+                }`}
                 style={{
-                  display: isToolsOpen ? 'block' : 'none',
                   position: 'absolute',
                   top: '100%',
                   zIndex: 9999,
