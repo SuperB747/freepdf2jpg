@@ -1,12 +1,12 @@
 {
-  "name": "client",
+  "name": "freepdf2jpg-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
+    "build": "vite build && cp dist/index.html dist/200.html",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {

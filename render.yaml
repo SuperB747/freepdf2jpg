@@ -5,35 +5,15 @@ services:
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
     headers:
-      - source: /**/*
+      - source: /**
         headers:
           - key: Cache-Control
             value: no-cache
     routes:
       - type: rewrite
-        source: /about
-        destination: /index.html
-      - type: rewrite
-        source: /pdf-to-jpg
-        destination: /index.html
-      - type: rewrite
-        source: /jpg-to-pdf
-        destination: /index.html
-      - type: rewrite
-        source: /contact
-        destination: /index.html
-      - type: rewrite
-        source: /qa
-        destination: /index.html
-      - type: rewrite
-        source: /privacy-policy
-        destination: /index.html
-      - type: rewrite
-        source: /terms-of-service
-        destination: /index.html
-      - type: rewrite
-        source: /**/*
-        destination: /index.html
+        source: /**
+        destination: /200.html
+        status: 200
     pullRequestPreviewsEnabled: true
     envVars:
       - key: VITE_API_URL
