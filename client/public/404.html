@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FreePDF2JPG</title>
     <script>
-      window.location.href = '/#' + window.location.pathname;
+      sessionStorage.redirect = location.pathname + location.search;
+      window.location.replace('/');
     </script>
   </head>
   <body>

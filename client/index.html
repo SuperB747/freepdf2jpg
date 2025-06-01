@@ -7,21 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- Handle SPA redirects -->
+    <!-- Handle redirects -->
     <script>
       (function() {
-        // Check if we need to redirect
-        const redirectUrl = sessionStorage.getItem('redirectUrl');
-        if (redirectUrl) {
-          // Remove the stored URL
-          sessionStorage.removeItem('redirectUrl');
-          
-          // Get the path from the stored URL
-          const url = new URL(redirectUrl);
-          const path = url.pathname + url.search + url.hash;
-          
-          // Replace the current history state with the original URL
-          window.history.replaceState(null, null, path);
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.pathname) {
+          history.replaceState(null, null, redirect);
         }
       })();
     </script>
