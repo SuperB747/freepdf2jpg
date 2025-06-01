@@ -31,6 +31,7 @@ export default function Navbar() {
             }}
           >
             <button
+              type="button"
               className="text-gray-300 hover:text-white transition w-full text-left"
               onClick={(e) => {
                 // Only toggle if it's not already open due to hover
