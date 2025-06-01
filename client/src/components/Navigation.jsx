@@ -58,6 +58,7 @@ export default function Navigation() {
               onMouseLeave={() => setIsToolsOpen(false)}
             >
               <button
+                type="button"
                 className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${
                   isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
                 }`}
