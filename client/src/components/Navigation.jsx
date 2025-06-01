@@ -37,9 +37,9 @@ export default function Navigation() {
       </div>
 
       {/* Navigation Bar */}
-      <nav className="bg-gray-800 mb-1 overflow-x-auto relative">
+      <nav className="bg-gray-800 mb-1 relative">
         <div className="max-w-4xl mx-auto">
-          <ul className="flex justify-center items-center min-w-max">
+          <ul className="flex justify-center items-center min-w-max px-4">
             <li>
               <Link
                 to="/"
@@ -56,26 +56,27 @@ export default function Navigation() {
                 About
               </Link>
             </li>
-            <li className="relative" ref={toolsRef}>
+            <li className="relative" style={{ position: 'relative' }} ref={toolsRef}>
               <button
                 type="button"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center hover:bg-blue-600 transition-colors ${
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center gap-1 hover:bg-blue-600 transition-colors ${
                   isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
                 }`}
                 onClick={toggleDropdown}
+                aria-expanded={isToolsOpen}
               >
                 <span>Tools</span>
                 <span 
-                  className={`ml-1 transition-transform duration-200 inline-block ${isToolsOpen ? 'rotate-180' : ''}`}
+                  className={`transition-transform duration-200 inline-block ${isToolsOpen ? 'rotate-180' : ''}`}
                 >
                   ▼
                 </span>
               </button>
               <div
-                className={`absolute left-0 w-48 bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700 ${
-                  isToolsOpen ? 'block' : 'hidden'
-                }`}
+                className={`dropdown-menu absolute left-0 min-w-[12rem] bg-gray-800 shadow-lg rounded-md overflow-hidden border border-gray-700`}
                 style={{
+                  display: isToolsOpen ? 'block' : 'none',
+                  position: 'absolute',
                   top: '100%',
                   zIndex: 9999,
                   marginTop: '1px',
@@ -83,14 +84,14 @@ export default function Navigation() {
               >
                 <Link
                   to="/pdf-to-jpg"
-                  className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
+                  className={`block w-full px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
                   onClick={() => setIsToolsOpen(false)}
                 >
                   PDF to JPG
                 </Link>
                 <Link
                   to="/jpg-to-pdf"
-                  className={`block px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
+                  className={`block w-full px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
                   onClick={() => setIsToolsOpen(false)}
                 >
                   JPG to PDF
