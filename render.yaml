@@ -10,6 +10,32 @@ services:
         headers:
           - key: Cache-Control
             value: no-cache
+          - key: X-Robots-Tag
+            value: all
+          - key: X-Content-Type-Options
+            value: nosniff
+    routes:
+      - type: redirect
+        source: /about
+        destination: /about/
+      - type: redirect
+        source: /pdf-to-jpg
+        destination: /pdf-to-jpg/
+      - type: redirect
+        source: /jpg-to-pdf
+        destination: /jpg-to-pdf/
+      - type: redirect
+        source: /contact
+        destination: /contact/
+      - type: redirect
+        source: /qa
+        destination: /qa/
+      - type: redirect
+        source: /privacy-policy
+        destination: /privacy-policy/
+      - type: redirect
+        source: /terms-of-service
+        destination: /terms-of-service/
     envVars:
       - key: VITE_API_URL
         value: https://freepdf2jpg-server.onrender.com/api

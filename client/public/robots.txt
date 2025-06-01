@@ -16,5 +16,11 @@ Disallow: /uploads/
 # Crawl-delay for all bots
 Crawl-delay: 1
 
+# Allow Google to crawl JavaScript
+User-agent: Googlebot
+Allow: /
+Allow: /*.js$
+Allow: /*.css$
+
 # Sitemap location
 Sitemap: https://freepdf2jpg.ca/sitemap.xml 
