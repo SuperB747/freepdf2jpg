@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# Remove www prefix
+RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# Redirect language paths to root
+RewriteRule ^(es|ko|zh|ja|fr)(/.*)?$ / [R=301,L]
+
+# Enable SPA routing
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule . /index.html [L] 

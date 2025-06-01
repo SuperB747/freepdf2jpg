@@ -3,6 +3,19 @@ User-agent: *
 Allow: /
 Allow: /pdf-to-jpg
 Allow: /jpg-to-pdf
+Allow: /about
+Allow: /qa
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+# Block non-existent language paths
+Disallow: /es/
+Disallow: /ko/
+Disallow: /zh/
+Disallow: /ja/
+Disallow: /fr/
+Disallow: /*/
 
 # Prevent access to API and sensitive directories
 Disallow: /api/
