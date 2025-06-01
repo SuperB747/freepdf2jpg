@@ -8,7 +8,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://freepdf2jpg.ca/</loc>
-    <lastmod>2024-03-20</lastmod>
+    <lastmod>2024-03-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -16,17 +16,17 @@
   <!-- PDF to JPG Converter -->
   <url>
     <loc>https://freepdf2jpg.ca/pdf-to-jpg</loc>
-    <lastmod>2024-03-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2024-03-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
 
   <!-- JPG to PDF Converter -->
   <url>
     <loc>https://freepdf2jpg.ca/jpg-to-pdf</loc>
-    <lastmod>2024-03-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2024-03-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
 
   <!-- About Page -->
