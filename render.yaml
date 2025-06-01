@@ -1,4 +1,5 @@
 services:
+  # Client configuration
   - type: web
     name: freepdf2jpg-client
     env: static
@@ -7,4 +8,18 @@ services:
     routes:
       - type: rewrite
         source: /*
-        destination: /index.html 
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://freepdf2jpg-server.onrender.com/api
+
+  # Server configuration
+  - type: web
+    name: freepdf2jpg-server
+    env: docker
+    dockerfilePath: ./server/Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://freepdf2jpg.ca 
