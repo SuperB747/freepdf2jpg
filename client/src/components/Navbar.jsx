@@ -19,6 +19,7 @@ export default function Navbar() {
         <div className="border-t border-gray-600"></div>
         <nav className="flex gap-6 items-center py-2 bg-[#121212]">
           <Link to="/about" className="text-gray-300 hover:text-white transition">About</Link>
+          <Link to="/contact" className="text-gray-300 hover:text-white transition">Contact Us</Link>
           <div
             className="relative"
             onMouseEnter={() => {

@@ -29,6 +29,14 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- Contact Page -->
+  <url>
+    <loc>https://freepdf2jpg.ca/contact</loc>
+    <lastmod>2024-03-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- About Page -->
   <url>
     <loc>https://freepdf2jpg.ca/about</loc>
