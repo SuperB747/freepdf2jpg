@@ -60,7 +60,7 @@ def convert_pdf_to_images(pdf_path, output_dir):
         logger.info(f"Converted page {page_number + 1} to image")
     
     pdf_document.close()
-    return images
+    return images 
 
 def create_pdf_from_images(image_paths, output_path):
     """Create PDF from multiple images with letter size pages"""
