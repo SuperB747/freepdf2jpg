@@ -1,7 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
 export default function About() {
+  const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <>
       <Helmet>
@@ -25,22 +32,22 @@ export default function About() {
         </section>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-semibold text-white mb-8 text-center">✨ Key Features</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="text-3xl font-semibold text-white mb-6 text-center">Why Choose Us?</h2>
+          <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-gray-800 rounded-lg p-8 shadow-xl transform hover:scale-105 transition-transform duration-300">
-              <h3 className="text-2xl font-semibold mb-4 text-blue-400">Security & Privacy First</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-blue-400">Privacy & Security</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start">
-                  <span className="text-2xl mr-3">🔐</span>
-                  <span>Your files are processed securely and are never stored on our servers post-conversion.</span>
+                  <span className="text-2xl mr-3">🔒</span>
+                  <span>Your files are processed securely and deleted immediately after conversion.</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-2xl mr-3">🧹</span>
-                  <span>We ensure automatic deletion of your files immediately after conversion to protect your privacy.</span>
+                  <span className="text-2xl mr-3">⚡</span>
+                  <span>All conversions happen on our secure servers, not in your browser.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-2xl mr-3">🛡️</span>
-                  <span>No watermarks, no file size limits (within reason for free service), and no registration required.</span>
+                  <span>We never store or share your files with third parties.</span>
                 </li>
               </ul>
             </div>
@@ -70,18 +77,18 @@ export default function About() {
             Experience the simplicity and security of FreePDF2JPG today.
           </p>
           <div className="space-x-4">
-            <Link
-              to="/pdf-to-jpg"
+            <button
+              onClick={() => handleNavigation('/pdf-to-jpg')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors duration-300"
             >
               PDF to JPG
-            </Link>
-            <Link
-              to="/jpg-to-pdf"
+            </button>
+            <button
+              onClick={() => handleNavigation('/jpg-to-pdf')}
               className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors duration-300"
             >
               JPG to PDF
-            </Link>
+            </button>
           </div>
         </section>
       </div>
