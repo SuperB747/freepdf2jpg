@@ -3,7 +3,7 @@ services:
   - type: web
     name: freepdf2jpg-client
     env: static
-    buildCommand: cd client && npm install && npm run build
+    buildCommand: cd client && npm install && npm run build && cp dist/index.html dist/404.html
     staticPublishPath: ./client/dist
     headers:
       - source: /*
@@ -13,8 +13,7 @@ services:
     routes:
       - type: rewrite
         source: /*
-        destination: /404.html
-        status: 404
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
         value: https://freepdf2jpg-server.onrender.com/api
