@@ -7,7 +7,7 @@ export default function Navigation() {
   const toolsRef = useRef(null);
 
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-blue-700' : '';
+    return location.pathname === path ? 'bg-gray-600' : '';
   };
 
   // Close dropdown when clicking outside
@@ -51,7 +51,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/')}`}
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-gray-700 transition-colors ${isActive('/')}`}
               >
                 Home
               </Link>
@@ -59,7 +59,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/about"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/about')}`}
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-gray-700 transition-colors ${isActive('/about')}`}
               >
                 About
               </Link>
@@ -73,8 +73,8 @@ export default function Navigation() {
             >
               <button
                 type="button"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center gap-1 hover:bg-blue-600 transition-colors ${
-                  isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-blue-700' : ''
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-flex items-center justify-center gap-1 hover:bg-gray-700 transition-colors ${
+                  isActive('/pdf-to-jpg') || isActive('/jpg-to-pdf') || isToolsOpen ? 'bg-gray-600' : ''
                 }`}
                 onClick={toggleDropdown}
                 aria-expanded={isToolsOpen}
@@ -101,14 +101,14 @@ export default function Navigation() {
               >
                 <Link
                   to="/pdf-to-jpg"
-                  className={`block w-full px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/pdf-to-jpg')}`}
+                  className={`block w-full px-4 py-2 text-white hover:bg-gray-700 transition-colors ${isActive('/pdf-to-jpg')}`}
                   onClick={() => setIsToolsOpen(false)}
                 >
                   PDF to JPG
                 </Link>
                 <Link
                   to="/jpg-to-pdf"
-                  className={`block w-full px-4 py-2 text-white hover:bg-blue-600 transition-colors ${isActive('/jpg-to-pdf')}`}
+                  className={`block w-full px-4 py-2 text-white hover:bg-gray-700 transition-colors ${isActive('/jpg-to-pdf')}`}
                   onClick={() => setIsToolsOpen(false)}
                 >
                   JPG to PDF
@@ -118,7 +118,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/qa"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/qa')}`}
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-gray-700 transition-colors ${isActive('/qa')}`}
               >
                 Q&A
               </Link>
@@ -126,7 +126,7 @@ export default function Navigation() {
             <li>
               <Link
                 to="/contact"
-                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-blue-600 transition-colors ${isActive('/contact')}`}
+                className={`text-white px-3 sm:px-6 py-3 sm:py-4 inline-block hover:bg-gray-700 transition-colors ${isActive('/contact')}`}
               >
                 Contact
               </Link>
