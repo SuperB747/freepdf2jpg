@@ -5,6 +5,11 @@ services:
     env: static
     buildCommand: cd client && npm install && npm run build
     staticPublishPath: ./client/dist
+    headers:
+      - source: /*
+        headers:
+          - key: Cache-Control
+            value: no-cache
     routes:
       - type: rewrite
         source: /*
