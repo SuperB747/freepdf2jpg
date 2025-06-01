@@ -9,11 +9,19 @@
     
     <!-- Handle SPA redirects -->
     <script>
-      (function(){
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect !== location.href) {
-          history.replaceState(null, null, redirect);
+      (function() {
+        // Check if we need to redirect
+        const redirectUrl = sessionStorage.getItem('redirectUrl');
+        if (redirectUrl) {
+          // Remove the stored URL
+          sessionStorage.removeItem('redirectUrl');
+          
+          // Get the path from the stored URL
+          const url = new URL(redirectUrl);
+          const path = url.pathname + url.search + url.hash;
+          
+          // Replace the current history state with the original URL
+          window.history.replaceState(null, null, path);
         }
       })();
     </script>
