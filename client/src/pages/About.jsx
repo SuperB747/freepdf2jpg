@@ -25,29 +25,39 @@ export default function About() {
         </header>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-semibold text-white mb-6 text-center">Our Mission</h2>
-          <div className="bg-gray-800 rounded-lg p-8 shadow-xl transform hover:scale-105 transition-transform duration-300">
-            <div className="flex items-start mb-6">
-              <span className="text-4xl mr-4">🎯</span>
-              <h3 className="text-2xl font-semibold text-purple-400">Empowering Digital Conversion</h3>
+          <h2 className="text-3xl font-semibold text-white mb-8 text-center">Our Mission</h2>
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-8 shadow-xl">
+            <div className="flex flex-col items-center mb-8">
+              <div className="w-16 h-16 bg-purple-500 bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                <span className="text-4xl">🎯</span>
+              </div>
+              <h3 className="text-2xl font-semibold text-purple-400 text-center">Empowering Digital Conversion</h3>
             </div>
-            <div className="space-y-6">
-              <p className="text-lg text-gray-300 leading-relaxed">
-                At FreePDF2JPG, our mission is to provide everyone with easy-to-use, reliable, and completely free file conversion tools. We believe that basic utilities like converting PDFs to JPGs or merging JPGs into PDFs should be accessible to all, without intrusive ads or hidden fees.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
-                  <span className="text-2xl mb-2 block">🚀</span>
+            <div className="space-y-8">
+              <div className="bg-gray-800 bg-opacity-50 rounded-lg p-6 border border-purple-500 border-opacity-20">
+                <p className="text-lg text-gray-300 leading-relaxed text-center">
+                  At FreePDF2JPG, our mission is to provide everyone with easy-to-use, reliable, and completely free file conversion tools. We believe that basic utilities like converting PDFs to JPGs or merging JPGs into PDFs should be accessible to all, without intrusive ads or hidden fees.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-800 bg-opacity-50 rounded-lg p-6 text-center border border-purple-500 border-opacity-10">
+                  <div className="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🚀</span>
+                  </div>
                   <h4 className="text-white font-semibold mb-2">Simplicity</h4>
                   <p className="text-gray-300 text-sm">Easy-to-use tools for everyone</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
-                  <span className="text-2xl mb-2 block">💎</span>
+                <div className="bg-gray-800 bg-opacity-50 rounded-lg p-6 text-center border border-purple-500 border-opacity-10">
+                  <div className="w-12 h-12 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">💎</span>
+                  </div>
                   <h4 className="text-white font-semibold mb-2">Quality</h4>
                   <p className="text-gray-300 text-sm">High-quality conversion results</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4 text-center">
-                  <span className="text-2xl mb-2 block">🔒</span>
+                <div className="bg-gray-800 bg-opacity-50 rounded-lg p-6 text-center border border-purple-500 border-opacity-10">
+                  <div className="w-12 h-12 bg-red-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🔒</span>
+                  </div>
                   <h4 className="text-white font-semibold mb-2">Security</h4>
                   <p className="text-gray-300 text-sm">Your privacy is our priority</p>
                 </div>
@@ -59,7 +69,7 @@ export default function About() {
         <section className="mb-12">
           <h2 className="text-3xl font-semibold text-white mb-6 text-center">Why Choose Us?</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-800 rounded-lg p-8 shadow-xl transform hover:scale-105 transition-transform duration-300">
+            <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
               <h3 className="text-2xl font-semibold mb-4 text-blue-400">Privacy & Security</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start">
@@ -76,7 +86,7 @@ export default function About() {
                 </li>
               </ul>
             </div>
-            <div className="bg-gray-800 rounded-lg p-8 shadow-xl transform hover:scale-105 transition-transform duration-300">
+            <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
               <h3 className="text-2xl font-semibold mb-4 text-green-400">User-Focused Experience</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start">
